@@ -1,0 +1,1776 @@
+{
+ "source": "Tableau des résultats 2025 (noms de clubs anonymisés)",
+ "teams": [
+  {
+   "number": 1,
+   "name": "LACOSTEL 1"
+  },
+  {
+   "number": 2,
+   "name": "LACOSTEL 2"
+  },
+  {
+   "number": 3,
+   "name": "CAUSSINAC 1"
+  },
+  {
+   "number": 4,
+   "name": "CAUSSINAC 2"
+  },
+  {
+   "number": 5,
+   "name": "SAINT-JUST-DES-PINS 1"
+  },
+  {
+   "number": 6,
+   "name": "SAINT-JUST-DES-PINS 2"
+  },
+  {
+   "number": 7,
+   "name": "SAINT-JUST-DES-PINS 3"
+  },
+  {
+   "number": 8,
+   "name": "CAMBELOUX"
+  },
+  {
+   "number": 9,
+   "name": "CASTELBRUN"
+  },
+  {
+   "number": 10,
+   "name": "VALCOMBE"
+  },
+  {
+   "number": 11,
+   "name": "ARGENTAL 1"
+  },
+  {
+   "number": 12,
+   "name": "ROQUELAIR"
+  },
+  {
+   "number": 13,
+   "name": "PEYRAGUE 1"
+  },
+  {
+   "number": 14,
+   "name": "PEYRAGUE 2"
+  },
+  {
+   "number": 15,
+   "name": "LOUBIGNAC 1"
+  },
+  {
+   "number": 16,
+   "name": "LOUBIGNAC 2"
+  },
+  {
+   "number": 17,
+   "name": "SAINT-ORIEL 1"
+  },
+  {
+   "number": 18,
+   "name": "SAINT-ORIEL 2"
+  },
+  {
+   "number": 19,
+   "name": "BOUSQUET-LE-HAUT"
+  },
+  {
+   "number": 20,
+   "name": "LAGRAULIE 1"
+  },
+  {
+   "number": 21,
+   "name": "LAGRAULIE 2"
+  },
+  {
+   "number": 22,
+   "name": "LAGRAULIE 3"
+  },
+  {
+   "number": 23,
+   "name": "LAFFITAU 1"
+  },
+  {
+   "number": 24,
+   "name": "LAFFITAU 2"
+  },
+  {
+   "number": 25,
+   "name": "FONTAUBE 1"
+  },
+  {
+   "number": 26,
+   "name": "FONTAUBE 2"
+  },
+  {
+   "number": 27,
+   "name": "FONTAUBE 3"
+  },
+  {
+   "number": 28,
+   "name": "BELMONTAGNE 1"
+  },
+  {
+   "number": 29,
+   "name": "BELMONTAGNE 2"
+  },
+  {
+   "number": 30,
+   "name": "BELMONTAGNE 3"
+  },
+  {
+   "number": 31,
+   "name": "VERDALON"
+  },
+  {
+   "number": 32,
+   "name": "CAZAUBIL 1"
+  },
+  {
+   "number": 33,
+   "name": "CAZAUBIL 2"
+  },
+  {
+   "number": 34,
+   "name": "CAZAUBIL 3"
+  },
+  {
+   "number": 35,
+   "name": "TERRASSOL"
+  },
+  {
+   "number": 36,
+   "name": "MIRANDOL 1"
+  },
+  {
+   "number": 37,
+   "name": "MIRANDOL 2"
+  },
+  {
+   "number": 38,
+   "name": "PRADELOUP 1"
+  },
+  {
+   "number": 39,
+   "name": "PRADELOUP 2"
+  },
+  {
+   "number": 40,
+   "name": "ESCALDOU"
+  }
+ ],
+ "rounds": [
+  {
+   "number": 1,
+   "matches": [
+    {
+     "teamA": 1,
+     "teamB": 26,
+     "pointsA": 8,
+     "scoreA": 13,
+     "scoreB": 8,
+     "pointsB": 2
+    },
+    {
+     "teamA": 2,
+     "teamB": 39,
+     "pointsA": 0,
+     "scoreA": 2,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 3,
+     "teamB": 29,
+     "pointsA": 8,
+     "scoreA": 13,
+     "scoreB": 8,
+     "pointsB": 2
+    },
+    {
+     "teamA": 4,
+     "teamB": 20,
+     "pointsA": 0,
+     "scoreA": 2,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 5,
+     "teamB": 34,
+     "pointsA": 2,
+     "scoreA": 2,
+     "scoreB": 7,
+     "pointsB": 8
+    },
+    {
+     "teamA": 6,
+     "teamB": 30,
+     "pointsA": 7,
+     "scoreA": 9,
+     "scoreB": 6,
+     "pointsB": 3
+    },
+    {
+     "teamA": 7,
+     "teamB": 14,
+     "pointsA": 0,
+     "scoreA": 1,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 8,
+     "teamB": 11,
+     "pointsA": 3,
+     "scoreA": 5,
+     "scoreB": 8,
+     "pointsB": 7
+    },
+    {
+     "teamA": 9,
+     "teamB": 40,
+     "pointsA": 5,
+     "scoreA": 9,
+     "scoreB": 9,
+     "pointsB": 5
+    },
+    {
+     "teamA": 10,
+     "teamB": 33,
+     "pointsA": 2,
+     "scoreA": 5,
+     "scoreB": 10,
+     "pointsB": 8
+    },
+    {
+     "teamA": 12,
+     "teamB": 18,
+     "pointsA": 6,
+     "scoreA": 12,
+     "scoreB": 11,
+     "pointsB": 4
+    },
+    {
+     "teamA": 13,
+     "teamB": 36,
+     "pointsA": 8,
+     "scoreA": 10,
+     "scoreB": 4,
+     "pointsB": 2
+    },
+    {
+     "teamA": 15,
+     "teamB": 31,
+     "pointsA": 9,
+     "scoreA": 13,
+     "scoreB": 5,
+     "pointsB": 1
+    },
+    {
+     "teamA": 16,
+     "teamB": 27,
+     "pointsA": 0,
+     "scoreA": 2,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 17,
+     "teamB": 23,
+     "pointsA": 8,
+     "scoreA": 13,
+     "scoreB": 8,
+     "pointsB": 2
+    },
+    {
+     "teamA": 19,
+     "teamB": 24,
+     "pointsA": 4,
+     "scoreA": 9,
+     "scoreB": 10,
+     "pointsB": 6
+    },
+    {
+     "teamA": 21,
+     "teamB": 35,
+     "pointsA": 10,
+     "scoreA": 13,
+     "scoreB": 0,
+     "pointsB": 0
+    },
+    {
+     "teamA": 22,
+     "teamB": 25,
+     "pointsA": 8,
+     "scoreA": 11,
+     "scoreB": 6,
+     "pointsB": 2
+    },
+    {
+     "teamA": 28,
+     "teamB": 37,
+     "pointsA": 10,
+     "scoreA": 13,
+     "scoreB": 1,
+     "pointsB": 0
+    },
+    {
+     "teamA": 32,
+     "teamB": 38,
+     "pointsA": 2,
+     "scoreA": 5,
+     "scoreB": 11,
+     "pointsB": 8
+    }
+   ]
+  },
+  {
+   "number": 2,
+   "matches": [
+    {
+     "teamA": 21,
+     "teamB": 7,
+     "pointsA": 10,
+     "scoreA": 13,
+     "scoreB": 2,
+     "pointsB": 0
+    },
+    {
+     "teamA": 22,
+     "teamB": 18,
+     "pointsA": 10,
+     "scoreA": 13,
+     "scoreB": 1,
+     "pointsB": 0
+    },
+    {
+     "teamA": 23,
+     "teamB": 32,
+     "pointsA": 7,
+     "scoreA": 9,
+     "scoreB": 7,
+     "pointsB": 3
+    },
+    {
+     "teamA": 24,
+     "teamB": 36,
+     "pointsA": 0,
+     "scoreA": 2,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 25,
+     "teamB": 12,
+     "pointsA": 3,
+     "scoreA": 8,
+     "scoreB": 10,
+     "pointsB": 7
+    },
+    {
+     "teamA": 26,
+     "teamB": 30,
+     "pointsA": 1,
+     "scoreA": 3,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 27,
+     "teamB": 9,
+     "pointsA": 9,
+     "scoreA": 13,
+     "scoreB": 5,
+     "pointsB": 1
+    },
+    {
+     "teamA": 28,
+     "teamB": 14,
+     "pointsA": 8,
+     "scoreA": 12,
+     "scoreB": 6,
+     "pointsB": 2
+    },
+    {
+     "teamA": 29,
+     "teamB": 39,
+     "pointsA": 1,
+     "scoreA": 3,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 31,
+     "teamB": 20,
+     "pointsA": 5,
+     "scoreA": 10,
+     "scoreB": 10,
+     "pointsB": 5
+    },
+    {
+     "teamA": 33,
+     "teamB": 2,
+     "pointsA": 0,
+     "scoreA": 2,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 34,
+     "teamB": 8,
+     "pointsA": 8,
+     "scoreA": 10,
+     "scoreB": 6,
+     "pointsB": 2
+    },
+    {
+     "teamA": 35,
+     "teamB": 19,
+     "pointsA": 0,
+     "scoreA": 1,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 37,
+     "teamB": 16,
+     "pointsA": 8,
+     "scoreA": 8,
+     "scoreB": 4,
+     "pointsB": 2
+    },
+    {
+     "teamA": 38,
+     "teamB": 1,
+     "pointsA": 8,
+     "scoreA": 10,
+     "scoreB": 6,
+     "pointsB": 2
+    },
+    {
+     "teamA": 40,
+     "teamB": 11,
+     "pointsA": 3,
+     "scoreA": 8,
+     "scoreB": 10,
+     "pointsB": 7
+    },
+    {
+     "teamA": 3,
+     "teamB": 10,
+     "pointsA": 9,
+     "scoreA": 12,
+     "scoreB": 4,
+     "pointsB": 1
+    },
+    {
+     "teamA": 4,
+     "teamB": 13,
+     "pointsA": 0,
+     "scoreA": 0,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 5,
+     "teamB": 15,
+     "pointsA": 0,
+     "scoreA": 1,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 6,
+     "teamB": 17,
+     "pointsA": 1,
+     "scoreA": 4,
+     "scoreB": 11,
+     "pointsB": 9
+    }
+   ]
+  },
+  {
+   "number": 3,
+   "matches": [
+    {
+     "teamA": 33,
+     "teamB": 40,
+     "pointsA": 4,
+     "scoreA": 6,
+     "scoreB": 7,
+     "pointsB": 6
+    },
+    {
+     "teamA": 25,
+     "teamB": 38,
+     "pointsA": 0,
+     "scoreA": 0,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 19,
+     "teamB": 36,
+     "pointsA": 5,
+     "scoreA": 8,
+     "scoreB": 8,
+     "pointsB": 5
+    },
+    {
+     "teamA": 17,
+     "teamB": 20,
+     "pointsA": 2,
+     "scoreA": 7,
+     "scoreB": 13,
+     "pointsB": 8
+    },
+    {
+     "teamA": 16,
+     "teamB": 18,
+     "pointsA": 3,
+     "scoreA": 8,
+     "scoreB": 8,
+     "pointsB": 7
+    },
+    {
+     "teamA": 15,
+     "teamB": 30,
+     "pointsA": 4,
+     "scoreA": 10,
+     "scoreB": 11,
+     "pointsB": 6
+    },
+    {
+     "teamA": 14,
+     "teamB": 35,
+     "pointsA": 0,
+     "scoreA": 2,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 13,
+     "teamB": 34,
+     "pointsA": 9,
+     "scoreA": 13,
+     "scoreB": 4,
+     "pointsB": 1
+    },
+    {
+     "teamA": 12,
+     "teamB": 21,
+     "pointsA": 7,
+     "scoreA": 11,
+     "scoreB": 8,
+     "pointsB": 3
+    },
+    {
+     "teamA": 11,
+     "teamB": 31,
+     "pointsA": 7,
+     "scoreA": 9,
+     "scoreB": 7,
+     "pointsB": 3
+    },
+    {
+     "teamA": 10,
+     "teamB": 29,
+     "pointsA": 8,
+     "scoreA": 13,
+     "scoreB": 7,
+     "pointsB": 2
+    },
+    {
+     "teamA": 9,
+     "teamB": 23,
+     "pointsA": 4,
+     "scoreA": 7,
+     "scoreB": 8,
+     "pointsB": 6
+    },
+    {
+     "teamA": 8,
+     "teamB": 37,
+     "pointsA": 10,
+     "scoreA": 13,
+     "scoreB": 2,
+     "pointsB": 0
+    },
+    {
+     "teamA": 7,
+     "teamB": 24,
+     "pointsA": 1,
+     "scoreA": 4,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 6,
+     "teamB": 22,
+     "pointsA": 7,
+     "scoreA": 12,
+     "scoreB": 10,
+     "pointsB": 3
+    },
+    {
+     "teamA": 5,
+     "teamB": 39,
+     "pointsA": 1,
+     "scoreA": 3,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 4,
+     "teamB": 28,
+     "pointsA": 1,
+     "scoreA": 5,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 3,
+     "teamB": 26,
+     "pointsA": 3,
+     "scoreA": 7,
+     "scoreB": 9,
+     "pointsB": 7
+    },
+    {
+     "teamA": 2,
+     "teamB": 27,
+     "pointsA": 1,
+     "scoreA": 5,
+     "scoreB": 12,
+     "pointsB": 9
+    },
+    {
+     "teamA": 1,
+     "teamB": 32,
+     "pointsA": 2,
+     "scoreA": 8,
+     "scoreB": 13,
+     "pointsB": 8
+    }
+   ]
+  },
+  {
+   "number": 4,
+   "matches": [
+    {
+     "teamA": 40,
+     "teamB": 2,
+     "pointsA": 10,
+     "scoreA": 13,
+     "scoreB": 2,
+     "pointsB": 0
+    },
+    {
+     "teamA": 39,
+     "teamB": 33,
+     "pointsA": 1,
+     "scoreA": 6,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 38,
+     "teamB": 30,
+     "pointsA": 10,
+     "scoreA": 13,
+     "scoreB": 1,
+     "pointsB": 0
+    },
+    {
+     "teamA": 37,
+     "teamB": 3,
+     "pointsA": 2,
+     "scoreA": 7,
+     "scoreB": 12,
+     "pointsB": 8
+    },
+    {
+     "teamA": 36,
+     "teamB": 29,
+     "pointsA": 1,
+     "scoreA": 6,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 35,
+     "teamB": 4,
+     "pointsA": 7,
+     "scoreA": 11,
+     "scoreB": 9,
+     "pointsB": 3
+    },
+    {
+     "teamA": 34,
+     "teamB": 19,
+     "pointsA": 1,
+     "scoreA": 6,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 32,
+     "teamB": 17,
+     "pointsA": 3,
+     "scoreA": 10,
+     "scoreB": 12,
+     "pointsB": 7
+    },
+    {
+     "teamA": 31,
+     "teamB": 5,
+     "pointsA": 7,
+     "scoreA": 11,
+     "scoreB": 8,
+     "pointsB": 3
+    },
+    {
+     "teamA": 28,
+     "teamB": 23,
+     "pointsA": 7,
+     "scoreA": 10,
+     "scoreB": 7,
+     "pointsB": 3
+    },
+    {
+     "teamA": 27,
+     "teamB": 21,
+     "pointsA": 8,
+     "scoreA": 13,
+     "scoreB": 9,
+     "pointsB": 2
+    },
+    {
+     "teamA": 26,
+     "teamB": 18,
+     "pointsA": 3,
+     "scoreA": 9,
+     "scoreB": 11,
+     "pointsB": 7
+    },
+    {
+     "teamA": 25,
+     "teamB": 6,
+     "pointsA": 10,
+     "scoreA": 13,
+     "scoreB": 1,
+     "pointsB": 0
+    },
+    {
+     "teamA": 24,
+     "teamB": 13,
+     "pointsA": 0,
+     "scoreA": 2,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 22,
+     "teamB": 9,
+     "pointsA": 2,
+     "scoreA": 5,
+     "scoreB": 9,
+     "pointsB": 8
+    },
+    {
+     "teamA": 20,
+     "teamB": 1,
+     "pointsA": 8,
+     "scoreA": 13,
+     "scoreB": 8,
+     "pointsB": 2
+    },
+    {
+     "teamA": 16,
+     "teamB": 7,
+     "pointsA": 1,
+     "scoreA": 2,
+     "scoreB": 10,
+     "pointsB": 9
+    },
+    {
+     "teamA": 15,
+     "teamB": 11,
+     "pointsA": 1,
+     "scoreA": 5,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 14,
+     "teamB": 10,
+     "pointsA": 10,
+     "scoreA": 13,
+     "scoreB": 1,
+     "pointsB": 0
+    },
+    {
+     "teamA": 12,
+     "teamB": 8,
+     "pointsA": 9,
+     "scoreA": 10,
+     "scoreB": 3,
+     "pointsB": 1
+    }
+   ]
+  },
+  {
+   "number": 5,
+   "matches": [
+    {
+     "teamA": 21,
+     "teamB": 13,
+     "pointsA": 0,
+     "scoreA": 1,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 22,
+     "teamB": 2,
+     "pointsA": 8,
+     "scoreA": 8,
+     "scoreB": 3,
+     "pointsB": 2
+    },
+    {
+     "teamA": 23,
+     "teamB": 25,
+     "pointsA": 6,
+     "scoreA": 9,
+     "scoreB": 8,
+     "pointsB": 4
+    },
+    {
+     "teamA": 24,
+     "teamB": 26,
+     "pointsA": 9,
+     "scoreA": 13,
+     "scoreB": 9,
+     "pointsB": 1
+    },
+    {
+     "teamA": 27,
+     "teamB": 10,
+     "pointsA": 7,
+     "scoreA": 11,
+     "scoreB": 9,
+     "pointsB": 3
+    },
+    {
+     "teamA": 28,
+     "teamB": 12,
+     "pointsA": 7,
+     "scoreA": 13,
+     "scoreB": 11,
+     "pointsB": 3
+    },
+    {
+     "teamA": 29,
+     "teamB": 8,
+     "pointsA": 1,
+     "scoreA": 2,
+     "scoreB": 11,
+     "pointsB": 9
+    },
+    {
+     "teamA": 30,
+     "teamB": 18,
+     "pointsA": 8,
+     "scoreA": 11,
+     "scoreB": 7,
+     "pointsB": 2
+    },
+    {
+     "teamA": 31,
+     "teamB": 33,
+     "pointsA": 1,
+     "scoreA": 5,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 32,
+     "teamB": 4,
+     "pointsA": 9,
+     "scoreA": 13,
+     "scoreB": 3,
+     "pointsB": 1
+    },
+    {
+     "teamA": 34,
+     "teamB": 11,
+     "pointsA": 2,
+     "scoreA": 7,
+     "scoreB": 12,
+     "pointsB": 8
+    },
+    {
+     "teamA": 35,
+     "teamB": 16,
+     "pointsA": 5,
+     "scoreA": 6,
+     "scoreB": 6,
+     "pointsB": 5
+    },
+    {
+     "teamA": 36,
+     "teamB": 5,
+     "pointsA": 10,
+     "scoreA": 13,
+     "scoreB": 0,
+     "pointsB": 0
+    },
+    {
+     "teamA": 37,
+     "teamB": 9,
+     "pointsA": 10,
+     "scoreA": 13,
+     "scoreB": 0,
+     "pointsB": 0
+    },
+    {
+     "teamA": 38,
+     "teamB": 14,
+     "pointsA": 8,
+     "scoreA": 13,
+     "scoreB": 7,
+     "pointsB": 2
+    },
+    {
+     "teamA": 39,
+     "teamB": 3,
+     "pointsA": 0,
+     "scoreA": 0,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 40,
+     "teamB": 20,
+     "pointsA": 1,
+     "scoreA": 5,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 1,
+     "teamB": 6,
+     "pointsA": 9,
+     "scoreA": 13,
+     "scoreB": 4,
+     "pointsB": 1
+    },
+    {
+     "teamA": 7,
+     "teamB": 19,
+     "pointsA": 1,
+     "scoreA": 6,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 15,
+     "teamB": 17,
+     "pointsA": 1,
+     "scoreA": 5,
+     "scoreB": 13,
+     "pointsB": 9
+    }
+   ]
+  },
+  {
+   "number": 6,
+   "matches": [
+    {
+     "teamA": 1,
+     "teamB": 37,
+     "pointsA": 2,
+     "scoreA": 7,
+     "scoreB": 11,
+     "pointsB": 8
+    },
+    {
+     "teamA": 2,
+     "teamB": 30,
+     "pointsA": 2,
+     "scoreA": 9,
+     "scoreB": 13,
+     "pointsB": 8
+    },
+    {
+     "teamA": 3,
+     "teamB": 11,
+     "pointsA": 3,
+     "scoreA": 7,
+     "scoreB": 9,
+     "pointsB": 7
+    },
+    {
+     "teamA": 4,
+     "teamB": 18,
+     "pointsA": 0,
+     "scoreA": 0,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 5,
+     "teamB": 27,
+     "pointsA": 0,
+     "scoreA": 2,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 6,
+     "teamB": 23,
+     "pointsA": 0,
+     "scoreA": 2,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 7,
+     "teamB": 38,
+     "pointsA": 9,
+     "scoreA": 12,
+     "scoreB": 5,
+     "pointsB": 1
+    },
+    {
+     "teamA": 8,
+     "teamB": 20,
+     "pointsA": 4,
+     "scoreA": 12,
+     "scoreB": 13,
+     "pointsB": 6
+    },
+    {
+     "teamA": 9,
+     "teamB": 12,
+     "pointsA": 1,
+     "scoreA": 5,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 10,
+     "teamB": 24,
+     "pointsA": 8,
+     "scoreA": 12,
+     "scoreB": 8,
+     "pointsB": 2
+    },
+    {
+     "teamA": 13,
+     "teamB": 40,
+     "pointsA": 1,
+     "scoreA": 5,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 14,
+     "teamB": 31,
+     "pointsA": 9,
+     "scoreA": 13,
+     "scoreB": 5,
+     "pointsB": 1
+    },
+    {
+     "teamA": 15,
+     "teamB": 39,
+     "pointsA": 9,
+     "scoreA": 13,
+     "scoreB": 3,
+     "pointsB": 1
+    },
+    {
+     "teamA": 16,
+     "teamB": 32,
+     "pointsA": 8,
+     "scoreA": 13,
+     "scoreB": 8,
+     "pointsB": 2
+    },
+    {
+     "teamA": 17,
+     "teamB": 29,
+     "pointsA": 2,
+     "scoreA": 5,
+     "scoreB": 9,
+     "pointsB": 8
+    },
+    {
+     "teamA": 19,
+     "teamB": 25,
+     "pointsA": 8,
+     "scoreA": 13,
+     "scoreB": 8,
+     "pointsB": 2
+    },
+    {
+     "teamA": 21,
+     "teamB": 34,
+     "pointsA": 9,
+     "scoreA": 13,
+     "scoreB": 5,
+     "pointsB": 1
+    },
+    {
+     "teamA": 22,
+     "teamB": 28,
+     "pointsA": 0,
+     "scoreA": 1,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 26,
+     "teamB": 35,
+     "pointsA": 8,
+     "scoreA": 13,
+     "scoreB": 8,
+     "pointsB": 2
+    },
+    {
+     "teamA": 33,
+     "teamB": 36,
+     "pointsA": 0,
+     "scoreA": 2,
+     "scoreB": 13,
+     "pointsB": 10
+    }
+   ]
+  },
+  {
+   "number": 7,
+   "matches": [
+    {
+     "teamA": 40,
+     "teamB": 38,
+     "pointsA": 8,
+     "scoreA": 13,
+     "scoreB": 8,
+     "pointsB": 2
+    },
+    {
+     "teamA": 39,
+     "teamB": 9,
+     "pointsA": 6,
+     "scoreA": 12,
+     "scoreB": 11,
+     "pointsB": 4
+    },
+    {
+     "teamA": 37,
+     "teamB": 18,
+     "pointsA": 3,
+     "scoreA": 8,
+     "scoreB": 11,
+     "pointsB": 7
+    },
+    {
+     "teamA": 36,
+     "teamB": 17,
+     "pointsA": 7,
+     "scoreA": 6,
+     "scoreB": 4,
+     "pointsB": 3
+    },
+    {
+     "teamA": 35,
+     "teamB": 2,
+     "pointsA": 8,
+     "scoreA": 13,
+     "scoreB": 7,
+     "pointsB": 2
+    },
+    {
+     "teamA": 34,
+     "teamB": 28,
+     "pointsA": 2,
+     "scoreA": 7,
+     "scoreB": 12,
+     "pointsB": 8
+    },
+    {
+     "teamA": 33,
+     "teamB": 27,
+     "pointsA": 2,
+     "scoreA": 5,
+     "scoreB": 11,
+     "pointsB": 8
+    },
+    {
+     "teamA": 32,
+     "teamB": 31,
+     "pointsA": 6,
+     "scoreA": 9,
+     "scoreB": 8,
+     "pointsB": 4
+    },
+    {
+     "teamA": 30,
+     "teamB": 21,
+     "pointsA": 5,
+     "scoreA": 12,
+     "scoreB": 12,
+     "pointsB": 5
+    },
+    {
+     "teamA": 29,
+     "teamB": 24,
+     "pointsA": 1,
+     "scoreA": 5,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 26,
+     "teamB": 8,
+     "pointsA": 8,
+     "scoreA": 13,
+     "scoreB": 8,
+     "pointsB": 2
+    },
+    {
+     "teamA": 25,
+     "teamB": 14,
+     "pointsA": 4,
+     "scoreA": 7,
+     "scoreB": 8,
+     "pointsB": 6
+    },
+    {
+     "teamA": 23,
+     "teamB": 1,
+     "pointsA": 3,
+     "scoreA": 5,
+     "scoreB": 7,
+     "pointsB": 7
+    },
+    {
+     "teamA": 22,
+     "teamB": 15,
+     "pointsA": 8,
+     "scoreA": 11,
+     "scoreB": 6,
+     "pointsB": 2
+    },
+    {
+     "teamA": 20,
+     "teamB": 5,
+     "pointsA": 8,
+     "scoreA": 13,
+     "scoreB": 7,
+     "pointsB": 2
+    },
+    {
+     "teamA": 19,
+     "teamB": 3,
+     "pointsA": 3,
+     "scoreA": 9,
+     "scoreB": 12,
+     "pointsB": 7
+    },
+    {
+     "teamA": 16,
+     "teamB": 12,
+     "pointsA": 1,
+     "scoreA": 4,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 13,
+     "teamB": 11,
+     "pointsA": 6,
+     "scoreA": 8,
+     "scoreB": 7,
+     "pointsB": 4
+    },
+    {
+     "teamA": 10,
+     "teamB": 7,
+     "pointsA": 10,
+     "scoreA": 13,
+     "scoreB": 1,
+     "pointsB": 0
+    },
+    {
+     "teamA": 6,
+     "teamB": 4,
+     "pointsA": 3,
+     "scoreA": 9,
+     "scoreB": 12,
+     "pointsB": 7
+    }
+   ]
+  },
+  {
+   "number": 8,
+   "matches": [
+    {
+     "teamA": 1,
+     "teamB": 28,
+     "pointsA": 1,
+     "scoreA": 3,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 2,
+     "teamB": 17,
+     "pointsA": 0,
+     "scoreA": 1,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 3,
+     "teamB": 21,
+     "pointsA": 0,
+     "scoreA": 2,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 4,
+     "teamB": 27,
+     "pointsA": 2,
+     "scoreA": 6,
+     "scoreB": 12,
+     "pointsB": 8
+    },
+    {
+     "teamA": 5,
+     "teamB": 9,
+     "pointsA": 9,
+     "scoreA": 13,
+     "scoreB": 3,
+     "pointsB": 1
+    },
+    {
+     "teamA": 6,
+     "teamB": 13,
+     "pointsA": 0,
+     "scoreA": 0,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 7,
+     "teamB": 18,
+     "pointsA": 1,
+     "scoreA": 6,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 8,
+     "teamB": 40,
+     "pointsA": 2,
+     "scoreA": 8,
+     "scoreB": 13,
+     "pointsB": 8
+    },
+    {
+     "teamA": 10,
+     "teamB": 31,
+     "pointsA": 9,
+     "scoreA": 13,
+     "scoreB": 5,
+     "pointsB": 1
+    },
+    {
+     "teamA": 11,
+     "teamB": 30,
+     "pointsA": 7,
+     "scoreA": 13,
+     "scoreB": 11,
+     "pointsB": 3
+    },
+    {
+     "teamA": 12,
+     "teamB": 34,
+     "pointsA": 3,
+     "scoreA": 6,
+     "scoreB": 8,
+     "pointsB": 7
+    },
+    {
+     "teamA": 14,
+     "teamB": 23,
+     "pointsA": 3,
+     "scoreA": 7,
+     "scoreB": 10,
+     "pointsB": 7
+    },
+    {
+     "teamA": 15,
+     "teamB": 36,
+     "pointsA": 1,
+     "scoreA": 6,
+     "scoreB": 13,
+     "pointsB": 9
+    },
+    {
+     "teamA": 16,
+     "teamB": 38,
+     "pointsA": 0,
+     "scoreA": 0,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 19,
+     "teamB": 39,
+     "pointsA": 5,
+     "scoreA": 12,
+     "scoreB": 12,
+     "pointsB": 5
+    },
+    {
+     "teamA": 20,
+     "teamB": 26,
+     "pointsA": 8,
+     "scoreA": 13,
+     "scoreB": 8,
+     "pointsB": 2
+    },
+    {
+     "teamA": 22,
+     "teamB": 24,
+     "pointsA": 1,
+     "scoreA": 3,
+     "scoreB": 11,
+     "pointsB": 9
+    },
+    {
+     "teamA": 25,
+     "teamB": 37,
+     "pointsA": 0,
+     "scoreA": 2,
+     "scoreB": 13,
+     "pointsB": 10
+    },
+    {
+     "teamA": 29,
+     "teamB": 33,
+     "pointsA": 9,
+     "scoreA": 13,
+     "scoreB": 5,
+     "pointsB": 1
+    },
+    {
+     "teamA": 32,
+     "teamB": 35,
+     "pointsA": 4,
+     "scoreA": 10,
+     "scoreB": 11,
+     "pointsB": 6
+    }
+   ]
+  }
+ ],
+ "excelRanking": [
+  {
+   "rank": 1,
+   "team": 27,
+   "pg": 69,
+   "pr": 99,
+   "diff": 55
+  },
+  {
+   "rank": 2,
+   "team": 28,
+   "pg": 68,
+   "pr": 99,
+   "diff": 58
+  },
+  {
+   "rank": 3,
+   "team": 13,
+   "pg": 64,
+   "pr": 88,
+   "diff": 57
+  },
+  {
+   "rank": 4,
+   "team": 20,
+   "pg": 62,
+   "pr": 101,
+   "diff": 42
+  },
+  {
+   "rank": 5,
+   "team": 38,
+   "pg": 57,
+   "pr": 86,
+   "diff": 42
+  },
+  {
+   "rank": 6,
+   "team": 11,
+   "pg": 56,
+   "pr": 81,
+   "diff": 23
+  },
+  {
+   "rank": 7,
+   "team": 36,
+   "pg": 54,
+   "pr": 76,
+   "diff": 31
+  },
+  {
+   "rank": 8,
+   "team": 19,
+   "pg": 53,
+   "pr": 90,
+   "diff": 27
+  },
+  {
+   "rank": 9,
+   "team": 12,
+   "pg": 53,
+   "pr": 86,
+   "diff": 26
+  },
+  {
+   "rank": 10,
+   "team": 40,
+   "pg": 50,
+   "pr": 81,
+   "diff": 20
+  },
+  {
+   "rank": 11,
+   "team": 17,
+   "pg": 50,
+   "pr": 78,
+   "diff": 22
+  },
+  {
+   "rank": 12,
+   "team": 21,
+   "pg": 49,
+   "pr": 82,
+   "diff": 24
+  },
+  {
+   "rank": 13,
+   "team": 3,
+   "pg": 48,
+   "pr": 78,
+   "diff": 19
+  },
+  {
+   "rank": 14,
+   "team": 18,
+   "pg": 46,
+   "pr": 75,
+   "diff": 8
+  },
+  {
+   "rank": 15,
+   "team": 24,
+   "pg": 44,
+   "pr": 72,
+   "diff": 4
+  },
+  {
+   "rank": 16,
+   "team": 23,
+   "pg": 44,
+   "pr": 69,
+   "diff": 8
+  },
+  {
+   "rank": 17,
+   "team": 30,
+   "pg": 42,
+   "pr": 78,
+   "diff": 2
+  },
+  {
+   "rank": 18,
+   "team": 14,
+   "pg": 42,
+   "pr": 69,
+   "diff": 7
+  },
+  {
+   "rank": 19,
+   "team": 39,
+   "pg": 41,
+   "pr": 72,
+   "diff": 2
+  },
+  {
+   "rank": 20,
+   "team": 10,
+   "pg": 41,
+   "pr": 70,
+   "diff": 3
+  },
+  {
+   "rank": 21,
+   "team": 37,
+   "pg": 41,
+   "pr": 63,
+   "diff": 1
+  },
+  {
+   "rank": 22,
+   "team": 22,
+   "pg": 40,
+   "pr": 62,
+   "diff": 1
+  },
+  {
+   "rank": 23,
+   "team": 35,
+   "pg": 38,
+   "pr": 63,
+   "diff": -10
+  },
+  {
+   "rank": 24,
+   "team": 32,
+   "pg": 37,
+   "pr": 75,
+   "diff": 0
+  },
+  {
+   "rank": 25,
+   "team": 15,
+   "pg": 37,
+   "pr": 71,
+   "diff": 1
+  },
+  {
+   "rank": 26,
+   "team": 8,
+   "pg": 33,
+   "pr": 66,
+   "diff": -5
+  },
+  {
+   "rank": 27,
+   "team": 1,
+   "pg": 33,
+   "pr": 65,
+   "diff": -12
+  },
+  {
+   "rank": 28,
+   "team": 29,
+   "pg": 33,
+   "pr": 60,
+   "diff": -19
+  },
+  {
+   "rank": 29,
+   "team": 33,
+   "pg": 33,
+   "pr": 56,
+   "diff": -17
+  },
+  {
+   "rank": 30,
+   "team": 26,
+   "pg": 32,
+   "pr": 72,
+   "diff": -14
+  },
+  {
+   "rank": 31,
+   "team": 34,
+   "pg": 30,
+   "pr": 54,
+   "diff": -23
+  },
+  {
+   "rank": 32,
+   "team": 25,
+   "pg": 25,
+   "pr": 52,
+   "diff": -26
+  },
+  {
+   "rank": 33,
+   "team": 9,
+   "pg": 24,
+   "pr": 49,
+   "diff": -37
+  },
+  {
+   "rank": 34,
+   "team": 31,
+   "pg": 23,
+   "pr": 56,
+   "diff": -32
+  },
+  {
+   "rank": 35,
+   "team": 7,
+   "pg": 21,
+   "pr": 42,
+   "diff": -43
+  },
+  {
+   "rank": 36,
+   "team": 16,
+   "pg": 20,
+   "pr": 39,
+   "diff": -40
+  },
+  {
+   "rank": 37,
+   "team": 6,
+   "pg": 19,
+   "pr": 41,
+   "diff": -50
+  },
+  {
+   "rank": 38,
+   "team": 2,
+   "pg": 17,
+   "pr": 42,
+   "diff": -45
+  },
+  {
+   "rank": 39,
+   "team": 5,
+   "pg": 17,
+   "pr": 36,
+   "diff": 0
+  },
+  {
+   "rank": 40,
+   "team": 4,
+   "pg": 14,
+   "pr": 37,
+   "diff": -60
+  },
+  {
+   "rank": 43,
+   "team": 41,
+   "pg": 0,
+   "pr": 0,
+   "diff": 0
+  }
+ ]
+}

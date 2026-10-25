@@ -128,6 +128,8 @@
     switch (issue.kind) {
       case 'same-club':
         return `Même club : ${names}`;
+      case 'same-sector':
+        return `Même secteur : ${names}`;
       case 'rematch':
         return `Ces équipes se sont déjà rencontrées : ${names}`;
       case 'duplicate':
@@ -141,9 +143,11 @@
 
   const levelText: Record<DrawLevel, string> = {
     strict: '',
+    'same-sector-allowed': 'Impossible d’éviter toutes les rencontres entre équipes du même secteur.',
     'rematch-allowed': 'Impossible d’éviter toutes les revanches : certaines équipes se rencontrent une deuxième fois.',
-    'same-club-allowed': 'Impossible d’éviter toutes les rencontres entre équipes du même club.',
-    unconstrained: 'Impossible d’éviter à la fois les revanches et les rencontres entre équipes du même club.',
+    'rematch-and-same-sector-allowed': 'Impossible d’éviter à la fois les revanches et les rencontres entre équipes du même secteur.',
+    'same-club-allowed': 'Impossible d’éviter toutes les rencontres entre équipes du même club (le secteur n’est plus pris en compte).',
+    unconstrained: 'Impossible d’éviter à la fois les revanches et les rencontres entre équipes du même club (le secteur n’est plus pris en compte).',
   };
 </script>
 

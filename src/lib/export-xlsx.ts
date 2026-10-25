@@ -55,8 +55,11 @@ export function exportXlsx(t: Tournament): void {
     utils.book_append_sheet(wb, sheet(standingsRows(t, round.number), STANDING_WIDTHS), `Après partie ${round.number}`);
   }
 
-  const teamRows: Cell[][] = [['N°', 'Équipe', 'Club'], ...[...t.teams].sort((a, b) => a.number - b.number).map((x) => [x.number, x.name, x.club])];
-  utils.book_append_sheet(wb, sheet(teamRows, [5, 28, 22]), 'Équipes');
+  const teamRows: Cell[][] = [
+    ['N°', 'Équipe', 'Club', 'Secteur'],
+    ...[...t.teams].sort((a, b) => a.number - b.number).map((x) => [x.number, x.name, x.club, x.sector ?? '']),
+  ];
+  utils.book_append_sheet(wb, sheet(teamRows, [5, 28, 22, 18]), 'Équipes');
 
   const data = write(wb, { bookType: 'xlsx', type: 'array' });
   const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });

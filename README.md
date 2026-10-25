@@ -5,7 +5,8 @@ Application de gestion des tournois de pétanque du club, pensée d'abord pour l
 réparti selon l'écart de score.
 
 - **Équipes** : saisie ou liste collée ; le club est déduit du nom (« VALCOMBE 2 » → VALCOMBE).
-- **Tirage** de chaque partie : pas deux équipes du même club, pas de rencontre déjà jouée ;
+- **Tirage** de chaque partie : pas deux équipes du même club, pas de rencontre déjà jouée,
+  et si possible pas deux équipes du même secteur (champ facultatif, ex. un département voisin) ;
   une équipe exempte (score forfaitaire réglable) si le nombre d'équipes est impair.
   Les rencontres restent modifiables à la main, avec contrôle des contraintes.
 - **Scores** : on ne saisit que les scores ; points gagnés, différence et classement sont calculés.

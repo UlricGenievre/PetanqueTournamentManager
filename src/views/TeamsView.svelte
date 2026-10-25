@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { normalizeClub } from '../lib/core/pairing';
+  import { normalizeClub, normalizeSector } from '../lib/core/pairing';
   import { clubFromTeamName, nextTeamNumber, parseTeamLines } from '../lib/core/tournament';
   import type { Team } from '../lib/core/types';
   import { app } from '../lib/store.svelte';
@@ -18,6 +18,17 @@
     for (const team of t.teams) {
       const key = normalizeClub(team.club);
       const entry = counts.get(key) ?? { label: team.club, count: 0 };
+      entry.count++;
+      counts.set(key, entry);
+    }
+    return [...counts.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+  });
+  const sectors = $derived.by(() => {
+    const counts = new Map<string, { label: string; count: number }>();
+    for (const team of t.teams) {
+      const key = normalizeSector(team.sector);
+      if (!key) continue;
+      const entry = counts.get(key) ?? { label: team.sector!, count: 0 };
       entry.count++;
       counts.set(key, entry);
     }
@@ -70,7 +81,7 @@
       {/if}
       <table>
         <thead>
-          <tr><th class="num">N°</th><th>Nom de l'équipe</th><th>Club</th><th></th></tr>
+          <tr><th class="num">N°</th><th>Nom de l'équipe</th><th>Club</th><th>Secteur</th><th></th></tr>
         </thead>
         <tbody>
           {#each sorted as team (team.id)}
@@ -88,6 +99,14 @@
               </td>
               <td><input value={team.name} onchange={(e) => rename(team, e.currentTarget.value.trim())} aria-label="Nom" /></td>
               <td><input value={team.club} onchange={(e) => (team.club = e.currentTarget.value.trim())} aria-label="Club" /></td>
+              <td>
+                <input
+                  value={team.sector ?? ''}
+                  onchange={(e) => (team.sector = e.currentTarget.value.trim() || undefined)}
+                  placeholder="—"
+                  aria-label="Secteur"
+                />
+              </td>
               <td>
                 {#if playing.has(team.id)}
                   <span class="muted small" title="L'équipe figure dans un tirage : retirez-la d'abord des rencontres.">dans un tirage</span>
@@ -131,6 +150,21 @@
         </ul>
       </section>
     {/if}
+
+    <section class="card">
+      <h3>Secteurs{sectors.length ? ` (${sectors.length})` : ''}</h3>
+      <p class="muted small">
+        Facultatif. Deux équipes d'un même secteur (ex. venues du même département) évitent de se rencontrer ;
+        cette règle est relâchée en premier si le tirage est impossible.
+      </p>
+      {#if sectors.length}
+        <ul class="clubs">
+          {#each sectors as sector (sector.label)}
+            <li><span>{sector.label}</span><span class="muted">{sector.count}</span></li>
+          {/each}
+        </ul>
+      {/if}
+    </section>
   </aside>
 </div>
 

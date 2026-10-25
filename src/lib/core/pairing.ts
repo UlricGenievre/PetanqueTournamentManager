@@ -1,23 +1,36 @@
 import { newId } from './ids';
 import type { Match, Round, Team, Tournament } from './types';
 
-/**
- * Normalise un nom de club : « St. Oriel du Pré 2 » et « ST ORIEL DU PRE » sont le même club.
- * Ignore la casse, les accents, la ponctuation et un éventuel numéro d'équipe final.
- */
-export function normalizeClub(club: string): string {
-  return club
+/** Normalise un libellé saisi à la main : ignore la casse, les accents et la ponctuation. */
+function normalizeLabel(label: string): string {
+  return label
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .toUpperCase()
     .replace(/[^A-Z0-9]+/g, ' ')
-    .trim()
-    .replace(/ \d+$/, '');
+    .trim();
+}
+
+/**
+ * Normalise un nom de club : « St. Oriel du Pré 2 » et « ST ORIEL DU PRE » sont le même club.
+ * Ignore aussi un éventuel numéro d'équipe final.
+ */
+export function normalizeClub(club: string): string {
+  return normalizeLabel(club).replace(/ \d+$/, '');
+}
+
+export function normalizeSector(sector: string | undefined): string {
+  return normalizeLabel(sector ?? '');
 }
 
 export function sameClub(a: Team, b: Team): boolean {
   const ca = normalizeClub(a.club);
   return ca !== '' && ca === normalizeClub(b.club);
+}
+
+export function sameSector(a: Team, b: Team): boolean {
+  const sa = normalizeSector(a.sector);
+  return sa !== '' && sa === normalizeSector(b.sector);
 }
 
 const pairKey = (a: string, b: string) => (a < b ? `${a}|${b}` : `${b}|${a}`);
@@ -83,7 +96,13 @@ function pairUp(ids: string[], allowed: (a: string, b: string) => boolean, rng: 
 }
 
 /** Niveau de contraintes finalement respecté par un tirage. */
-export type DrawLevel = 'strict' | 'rematch-allowed' | 'same-club-allowed' | 'unconstrained';
+export type DrawLevel =
+  | 'strict'
+  | 'same-sector-allowed'
+  | 'rematch-allowed'
+  | 'rematch-and-same-sector-allowed'
+  | 'same-club-allowed'
+  | 'unconstrained';
 
 export interface DrawResult {
   matches: Match[];
@@ -92,9 +111,10 @@ export interface DrawResult {
 
 /**
  * Tire au sort les rencontres de la partie `roundNumber`.
- * Contraintes : pas deux équipes du même club, pas de rencontre déjà jouée.
+ * Contraintes : pas deux équipes du même club, pas de rencontre déjà jouée, pas deux équipes du même secteur.
  * Si le nombre d'équipes est impair, une équipe (parmi les moins souvent exemptées) est exempte.
- * Si aucun tirage strict n'existe, les contraintes sont relâchées progressivement (`level` l'indique).
+ * Si aucun tirage strict n'existe, les contraintes sont relâchées progressivement (`level` l'indique) :
+ * le secteur d'abord, puis les revanches, puis le club (le secteur n'est plus vérifié une fois le club relâché).
  */
 export function drawRound(tournament: Tournament, roundNumber: number, rng: Rng = Math.random): DrawResult {
   const teams = new Map(tournament.teams.map((t) => [t.id, t]));
@@ -108,10 +128,15 @@ export function drawRound(tournament: Tournament, roundNumber: number, rng: Rng 
     byeCandidates = shuffle(ids.filter((id) => (counts.get(id) ?? 0) === min), rng);
   }
 
+  const rematch = (a: string, b: string) => met.has(pairKey(a, b));
+  const club = (a: string, b: string) => sameClub(teams.get(a)!, teams.get(b)!);
+  const sector = (a: string, b: string) => sameSector(teams.get(a)!, teams.get(b)!);
   const levels: [DrawLevel, (a: string, b: string) => boolean][] = [
-    ['strict', (a, b) => !met.has(pairKey(a, b)) && !sameClub(teams.get(a)!, teams.get(b)!)],
-    ['rematch-allowed', (a, b) => !sameClub(teams.get(a)!, teams.get(b)!)],
-    ['same-club-allowed', (a, b) => !met.has(pairKey(a, b))],
+    ['strict', (a, b) => !rematch(a, b) && !club(a, b) && !sector(a, b)],
+    ['same-sector-allowed', (a, b) => !rematch(a, b) && !club(a, b)],
+    ['rematch-allowed', (a, b) => !club(a, b) && !sector(a, b)],
+    ['rematch-and-same-sector-allowed', (a, b) => !club(a, b)],
+    ['same-club-allowed', (a, b) => !rematch(a, b)],
     ['unconstrained', () => true],
   ];
 
@@ -128,7 +153,7 @@ export function drawRound(tournament: Tournament, roundNumber: number, rng: Rng 
   throw new Error('Tirage impossible');
 }
 
-export type IssueKind = 'duplicate' | 'missing' | 'same-club' | 'rematch' | 'multiple-byes';
+export type IssueKind = 'duplicate' | 'missing' | 'same-club' | 'same-sector' | 'rematch' | 'multiple-byes';
 
 export interface RoundIssue {
   kind: IssueKind;
@@ -136,7 +161,7 @@ export interface RoundIssue {
   matchId?: string;
 }
 
-/** Contrôle une partie (tirage modifié à la main) : doublons, absents, même club, revanches. */
+/** Contrôle une partie (tirage modifié à la main) : doublons, absents, même club, même secteur, revanches. */
 export function validateRound(tournament: Tournament, round: Round): RoundIssue[] {
   const issues: RoundIssue[] = [];
   const teams = new Map(tournament.teams.map((t) => [t.id, t]));
@@ -153,6 +178,7 @@ export function validateRound(tournament: Tournament, round: Round): RoundIssue[
     const a = teams.get(m.teamA);
     const b = teams.get(m.teamB);
     if (a && b && sameClub(a, b)) issues.push({ kind: 'same-club', teamIds: [a.id, b.id], matchId: m.id });
+    else if (a && b && sameSector(a, b)) issues.push({ kind: 'same-sector', teamIds: [a.id, b.id], matchId: m.id });
     if (met.has(pairKey(m.teamA, m.teamB))) issues.push({ kind: 'rematch', teamIds: [m.teamA, m.teamB], matchId: m.id });
   }
 

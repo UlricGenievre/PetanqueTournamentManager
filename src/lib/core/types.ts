@@ -10,6 +10,8 @@ export interface Team {
   name: string;
   /** Club d'appartenance : deux équipes du même club ne doivent pas se rencontrer. */
   club: string;
+  /** Secteur facultatif (ex. département voisin) : deux équipes du même secteur évitent de se rencontrer. */
+  sector?: string;
 }
 
 export interface Match {

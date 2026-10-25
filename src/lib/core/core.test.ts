@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import fixture from './__fixtures__/montesquieu-2025.json';
-import { drawRound, meetings, sameClub, validateRound } from './pairing';
+import { drawRound, meetings, sameClub, sameSector, validateRound } from './pairing';
 import { DEFAULT_SCORING, matchPoints } from './scoring';
 import { computeStandings } from './standings';
 import { clubFromTeamName, createTournament, parseTeamLines } from './tournament';
@@ -149,6 +149,31 @@ describe('tirage', () => {
     expect(matches).toHaveLength(1);
   });
 
+  it.each([1, 2, 3, 4, 5])('6 équipes d’un même secteur ne se rencontrent pas (graine %i)', (seed) => {
+    const t = emptyTournament(40);
+    t.teams.slice(10, 16).forEach((team) => (team.sector = 'Département voisin'));
+    expect(playAllRounds(t, seed).every((l) => l === 'strict')).toBe(true);
+    for (const round of t.rounds) expect(validateRound(t, round)).toEqual([]);
+  });
+
+  it('relâche le secteur avant les revanches', () => {
+    const t = createTournament();
+    t.teams = parseTeamLines('VALCOMBE\nMIRANDOL\nSERVIAC\nARGENTAL');
+    const [a, b, c, d] = t.teams.map((x) => x.id);
+    for (const team of [t.teams[0], t.teams[2], t.teams[3]]) team.sector = 'VOISIN';
+    t.rounds = [{ number: 1, matches: [{ id: 'm1', teamA: a, teamB: b, scoreA: 13, scoreB: 5 }, { id: 'm2', teamA: c, teamB: d, scoreA: 13, scoreB: 5 }] }];
+    const { matches, level } = drawRound(t, 2, seeded(1));
+    expect(level).toBe('same-sector-allowed');
+    expect(validateRound(t, { number: 2, matches }).map((i) => i.kind)).toEqual(['same-sector']);
+  });
+
+  it('relâche le secteur avant le club', () => {
+    const t = createTournament();
+    t.teams = parseTeamLines('VALCOMBE\nMIRANDOL');
+    t.teams.forEach((team) => (team.sector = 'VOISIN'));
+    expect(drawRound(t, 1, seeded(1)).level).toBe('same-sector-allowed');
+  });
+
   it('signale les erreurs d’un tirage modifié à la main', () => {
     const t = tournament2025();
     const round = structuredClone(t.rounds[1]);
@@ -191,5 +216,15 @@ describe('équipes', () => {
     b.club = 'Verdalon 2';
     expect(sameClub(a, b)).toBe(true);
     expect(sameClub(a, c)).toBe(false);
+  });
+
+  it('compare les secteurs sans tenir compte de la casse ni des accents ; secteur vide = aucun', () => {
+    const [a, b, c, d] = parseTeamLines('VERDALON 1\nARGENTAL 1\nSERVIAC\nMIRANDOL');
+    a.sector = 'Département 47';
+    b.sector = 'DEPARTEMENT 47';
+    c.sector = 'Département 32';
+    expect(sameSector(a, b)).toBe(true);
+    expect(sameSector(a, c)).toBe(false);
+    expect(sameSector(d, { ...d, id: 'x' })).toBe(false);
   });
 });

@@ -12,11 +12,11 @@
     <tr><th class="num">Terrain</th><th class="num">N°</th><th>Équipe</th><th></th><th class="num">N°</th><th>Équipe</th></tr>
   </thead>
   <tbody>
-    {#each round.matches as m, i (m.id)}
+    {#each round.matches as m (m.id)}
       {@const a = teams.get(m.teamA)}
       {@const b = m.teamB === null ? null : teams.get(m.teamB)}
       <tr>
-        <td class="num terrain">{m.teamB === null ? '—' : i + 1}</td>
+        <td class="num terrain">{#if m.teamB === null}—{:else if m.court != null}{m.court}{:else}<em class="waiting">attente</em>{/if}</td>
         <td class="num">{a?.number}</td>
         <td>{a?.name}</td>
         {#if m.teamB === null}
@@ -62,6 +62,12 @@
 
   .terrain {
     font-weight: 700;
+  }
+
+  .waiting {
+    font-weight: 400;
+    font-size: 10pt;
+    color: #555;
   }
 
   .vs {

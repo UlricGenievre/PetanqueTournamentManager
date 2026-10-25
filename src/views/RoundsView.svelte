@@ -1,5 +1,6 @@
 <script lang="ts">
   import { tick } from 'svelte';
+  import { assignCourts, courtConflicts, displacedBy, freeCourts, isWaiting, setCourt, teamsReady } from '../lib/core/courts';
   import { newId } from '../lib/core/ids';
   import { drawRound, validateRound, type DrawLevel, type RoundIssue } from '../lib/core/pairing';
   import { effectiveScores, matchPoints } from '../lib/core/scoring';
@@ -25,6 +26,11 @@
   const round = $derived(t.rounds.find((r) => r.number === selected));
   const canDraw = $derived(selected === t.rounds.length + 1 && t.teams.length >= 2);
   const issues = $derived(round ? validateRound(t, round) : []);
+  const conflicts = $derived(round ? courtConflicts(t, round) : []);
+  const free = $derived(freeCourts(t));
+  const waiting = $derived(round ? round.matches.filter(isWaiting) : []);
+  /** Rencontres en attente dont une équipe joue encore une partie précédente. */
+  const notReady = $derived(round ? new Set(waiting.filter((m) => !teamsReady(t, round, m))) : new Set<Match>());
   const scoredCount = (r: Round) => r.matches.filter((m) => m.teamB !== null && m.scoreA !== null && m.scoreB !== null).length;
   const playableCount = (r: Round) => r.matches.filter((m) => m.teamB !== null).length;
   const hasScores = (r: Round) => r.matches.some((m) => m.scoreA !== null || m.scoreB !== null);
@@ -32,15 +38,13 @@
   const visibleMatches = $derived.by(() => {
     if (!round) return [];
     const q = filter.trim().toLowerCase();
-    return round.matches
-      .map((match, i) => ({ match, terrain: i + 1 }))
-      .filter(({ match }) => {
-        if (!q) return true;
-        return [match.teamA, match.teamB].some((id) => {
-          const team = id ? teamsById.get(id) : undefined;
-          return team && (team.name.toLowerCase().includes(q) || String(team.number) === q);
-        });
+    return round.matches.filter((match) => {
+      if (!q) return true;
+      return [match.teamA, match.teamB].some((id) => {
+        const team = id ? teamsById.get(id) : undefined;
+        return team && (team.name.toLowerCase().includes(q) || String(team.number) === q);
       });
+    });
   });
 
   const teamLabel = (id: string | null) => {
@@ -53,6 +57,7 @@
     const existing = t.rounds.find((r) => r.number === selected);
     if (existing) existing.matches = result.matches;
     else t.rounds.push({ number: selected, matches: result.matches });
+    assignCourts(t);
     drawMessage = result.level === 'strict' ? null : { round: selected, level: result.level };
     editing = false;
   }
@@ -68,12 +73,44 @@
       : `Supprimer le tirage de la partie ${round.number} ?`;
     if (!confirm(msg)) return;
     t.rounds.splice(t.rounds.indexOf(round), 1);
+    assignCourts(t);
     editing = false;
   }
 
   function parseScore(raw: string): number | null {
     const digits = raw.replace(/\D/g, '');
     return digits === '' ? null : Math.min(Number(digits), 99);
+  }
+
+  /** Score saisi : le terrain de la rencontre se libère pour la suivante. */
+  function scoreChanged() {
+    assignCourts(t);
+  }
+
+  /** Terrain saisi à la main, par exemple quand on sait qu'un terrain est libre avant d'avoir le score. */
+  function changeCourt(match: Match, input: HTMLInputElement) {
+    if (!round) return;
+    const digits = input.value.replace(/\D/g, '');
+    const court = digits === '' ? null : Number(digits);
+    const max = t.settings.courtCount ?? 99;
+    const revert = () => (input.value = String(match.court ?? ''));
+    if (court === match.court || (court === null && match.court == null)) return revert();
+    if (court !== null && (court < 1 || court > max)) {
+      alert(`Les terrains sont numérotés de 1 à ${max}.`);
+      return revert();
+    }
+    const displaced = displacedBy(t, match, court);
+    if (displaced.length) {
+      const names = displaced.map((m) => `${teamLabel(m.teamA)} contre ${teamLabel(m.teamB)}${partOf(m)}`).join(', ');
+      if (!confirm(`Le terrain ${court} est occupé par « ${names} », dont le score n'est pas encore saisi. Considérer cette rencontre comme terminée ?`)) return revert();
+    }
+    setCourt(t, match, court);
+  }
+
+  /** « (partie 1) » pour une rencontre d'une autre partie que celle affichée. */
+  function partOf(match: Match): string {
+    const r = t.rounds.find((x) => x.matches.includes(match));
+    return r && r !== round ? ` (partie ${r.number})` : '';
   }
 
   /** Entrée : passe au score suivant (comme Tab). */
@@ -107,6 +144,7 @@
     if (slot === 'teamB') match.teamB = teamId;
     else if (teamId !== null) match.teamA = teamId;
     for (const m of touched) m.scoreA = m.scoreB = null;
+    assignCourts(t);
   }
 
   const missingTeams = $derived(issues.find((i) => i.kind === 'missing')?.teamIds ?? []);
@@ -114,13 +152,15 @@
   function addMatch() {
     if (!round || missingTeams.length === 0) return;
     const [a, b = null] = missingTeams;
-    round.matches.push({ id: newId(), teamA: a, teamB: b, scoreA: null, scoreB: null });
+    round.matches.push({ id: newId(), teamA: a, teamB: b, scoreA: null, scoreB: null, court: null });
+    assignCourts(t);
   }
 
   function removeMatch(match: Match) {
     if (!round) return;
     if ((match.scoreA !== null || match.scoreB !== null) && !confirm('Supprimer cette rencontre et son score ?')) return;
     round.matches.splice(round.matches.indexOf(match), 1);
+    assignCourts(t);
   }
 
   function issueText(issue: RoundIssue): string {
@@ -203,12 +243,19 @@
     {#if drawMessage && drawMessage.round === round.number}
       <div class="notice warn">{levelText[drawMessage.level]}</div>
     {/if}
-    {#if issues.length}
+    {#if issues.length || conflicts.length}
       <div class="notice warn issues">
         <ul>
           {#each issues as issue, i (i)}<li>{issueText(issue)}</li>{/each}
+          {#each conflicts as court (court)}<li>Plusieurs rencontres en cours sur le terrain {court}</li>{/each}
         </ul>
       </div>
+    {/if}
+    {#if waiting.length}
+      <p class="courts-status">
+        <strong>{waiting.length}</strong> rencontre{waiting.length > 1 ? 's' : ''} en attente d'un terrain{#if notReady.size}, dont {notReady.size} où une équipe joue encore une partie précédente{/if}.
+        {#if free.length}Terrain{free.length > 1 ? 's' : ''} libre{free.length > 1 ? 's' : ''} : {free.join(', ')}.{:else}<span class="muted">Un terrain se libère à la saisie du score ; on peut aussi indiquer le terrain à la main.</span>{/if}
+      </p>
     {/if}
 
     <table class="matches">
@@ -223,11 +270,26 @@
         </tr>
       </thead>
       <tbody>
-        {#each visibleMatches as { match, terrain } (match.id)}
+        {#each visibleMatches as match (match.id)}
           {@const scores = effectiveScores(match, t.settings)}
           {@const points = scores ? matchPoints(scores[0], scores[1], t.settings.scoring) : null}
-          <tr class:complete={!!scores} class:bye={match.teamB === null}>
-            <td class="num terrain">{match.teamB === null ? '—' : terrain}</td>
+          <tr class:complete={!!scores} class:bye={match.teamB === null} class:waiting={isWaiting(match)}>
+            <td class="num terrain">
+              {#if match.teamB === null}
+                —
+              {:else}
+                <input
+                  class="court"
+                  inputmode="numeric"
+                  maxlength="2"
+                  placeholder={notReady.has(match) ? 'en jeu' : 'attente'}
+                  title={notReady.has(match) ? 'Une équipe joue encore une partie précédente' : undefined}
+                  value={match.court ?? ''}
+                  onchange={(e) => changeCourt(match, e.currentTarget)}
+                  aria-label={`Terrain de ${teamLabel(match.teamA)} contre ${teamLabel(match.teamB)}`}
+                />
+              {/if}
+            </td>
             <td class="team-a" class:winner={scores && scores[0] > scores[1]}>
               {#if editing}
                 <select value={match.teamA} onchange={(e) => {
@@ -250,6 +312,7 @@
                   maxlength="2"
                   value={match.scoreA ?? ''}
                   oninput={(e) => (match.scoreA = parseScore(e.currentTarget.value))}
+                  onchange={scoreChanged}
                   onkeydown={nextOnEnter}
                   aria-label={`Score ${teamLabel(match.teamA)}`}
                 />
@@ -260,6 +323,7 @@
                   maxlength="2"
                   value={match.scoreB ?? ''}
                   oninput={(e) => (match.scoreB = parseScore(e.currentTarget.value))}
+                  onchange={scoreChanged}
                   onkeydown={nextOnEnter}
                   aria-label={`Score ${teamLabel(match.teamB)}`}
                 />
@@ -407,6 +471,27 @@
   .terrain {
     font-weight: 600;
     width: 4.5rem;
+  }
+
+  input.court {
+    width: 3.6em;
+    text-align: center;
+    font-weight: 600;
+    padding: 0.2em;
+  }
+
+  input.court::placeholder {
+    font-weight: 400;
+    font-size: 0.8rem;
+    font-style: italic;
+  }
+
+  .matches tr.waiting input.court {
+    border-style: dashed;
+  }
+
+  .courts-status {
+    margin: 0 0 0.75rem;
   }
 
   .winner {

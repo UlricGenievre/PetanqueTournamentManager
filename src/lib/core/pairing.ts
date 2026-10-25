@@ -145,8 +145,8 @@ export function drawRound(tournament: Tournament, roundNumber: number, rng: Rng 
       const pool = ids.filter((id) => id !== bye);
       const pairs = pairUp(pool, allowed, rng, { left: 20000 });
       if (!pairs) continue;
-      const matches: Match[] = pairs.map(([a, b]) => ({ id: newId(), teamA: a, teamB: b, scoreA: null, scoreB: null }));
-      if (bye !== null) matches.push({ id: newId(), teamA: bye, teamB: null, scoreA: null, scoreB: null });
+      const matches: Match[] = pairs.map(([a, b]) => ({ id: newId(), teamA: a, teamB: b, scoreA: null, scoreB: null, court: null }));
+      if (bye !== null) matches.push({ id: newId(), teamA: bye, teamB: null, scoreA: null, scoreB: null, court: null });
       return { matches, level };
     }
   }

@@ -3,17 +3,17 @@
 
   let { tournament, round }: { tournament: Tournament; round: Round } = $props();
   const teams = $derived(new Map(tournament.teams.map((t) => [t.id, t])));
-  const matches = $derived(round.matches.map((m, i) => ({ m, terrain: i + 1 })).filter(({ m }) => m.teamB !== null));
+  const matches = $derived(round.matches.filter((m) => m.teamB !== null));
 </script>
 
 <div class="slips">
-  {#each matches as { m, terrain } (m.id)}
+  {#each matches as m (m.id)}
     {@const a = teams.get(m.teamA)}
     {@const b = m.teamB === null ? undefined : teams.get(m.teamB)}
     <div class="slip">
       <div class="head">
         <span>{tournament.name}</span>
-        <strong>Partie {round.number} · Terrain {terrain}</strong>
+        <strong>Partie {round.number} · Terrain {m.court ?? '____'}</strong>
       </div>
       <div class="line">
         <span class="team"><b>{a?.number}</b> {a?.name}</span><span class="box"></span>

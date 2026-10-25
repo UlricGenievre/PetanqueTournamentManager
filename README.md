@@ -9,6 +9,11 @@ réparti selon l'écart de score.
   et si possible pas deux équipes du même secteur (champ facultatif, ex. un département voisin) ;
   une équipe exempte (score forfaitaire réglable) si le nombre d'équipes est impair.
   Les rencontres restent modifiables à la main, avec contrôle des contraintes.
+- **Terrains** : nombre de terrains réglable (numérotés de 1 à n), partagés entre les parties.
+  Les parties s'enchaînent sans attendre la fin de la précédente : une rencontre reçoit un
+  terrain libre dès que ses deux équipes ont fini leur partie précédente, et un terrain ne se
+  libère que lorsque le score de sa rencontre est saisi. Le terrain peut aussi être indiqué à
+  la main, quand on sait qu'il est libre avant d'avoir le score.
 - **Scores** : on ne saisit que les scores ; points gagnés, différence et classement sont calculés.
 - **Classement** en direct et après chaque partie (départage : points gagnés, points réalisés, différence).
 - **Impressions** : liste des rencontres, fiches de match à découper, classements.

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { assignCourts } from '../lib/core/courts';
   import { DEFAULT_SCORING } from '../lib/core/scoring';
   import { exportXlsx } from '../lib/export-xlsx';
   import { canUseFileSystem } from '../lib/persistence';
@@ -29,6 +30,16 @@
     if (Number.isInteger(n) && n >= min) apply(n);
   }
 
+  /** Champ vide : un terrain par rencontre. Les terrains ajoutés vont aux rencontres en attente. */
+  function setCourtCount(input: HTMLInputElement) {
+    const raw = input.value.trim();
+    const n = Number(raw);
+    if (raw === '') s.courtCount = null;
+    else if (Number.isInteger(n) && n >= 1) s.courtCount = Math.min(n, 99);
+    input.value = String(s.courtCount ?? '');
+    assignCourts(t);
+  }
+
   const isDefaultScoring = $derived(s.scoring.total === DEFAULT_SCORING.total && s.scoring.table.join() === DEFAULT_SCORING.table.join());
 </script>
 
@@ -52,7 +63,16 @@
           onchange={(e) => setNumber((n) => (s.roundCount = Math.min(20, n)), e.currentTarget.value, Math.max(1, t.rounds.length))}
         />
       </label>
+      <label>
+        Nombre de terrains
+        <input type="number" min="1" max="99" placeholder="illimité" value={s.courtCount ?? ''} onchange={(e) => setCourtCount(e.currentTarget)} />
+      </label>
     </div>
+    <p class="muted small">
+      Terrains numérotés de 1 à n, partagés entre les parties. Une rencontre reçoit un terrain libre dès que ses deux
+      équipes ont fini leur partie précédente ; un terrain se libère à la saisie du score. Sans nombre, chaque rencontre
+      a son terrain.
+    </p>
 
     <h3>Équipe exempte (nombre impair d'équipes)</h3>
     <p class="muted small">Score forfaitaire attribué à l'équipe qui ne joue pas.</p>

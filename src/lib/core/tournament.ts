@@ -1,3 +1,4 @@
+import { migrateCourts } from './courts';
 import { newId } from './ids';
 import { DEFAULT_SCORING } from './scoring';
 import { SCHEMA_VERSION, type Team, type Tournament } from './types';
@@ -10,6 +11,7 @@ export function createTournament(name = '12 Heures de Pétanque de Montesquieu',
     date,
     settings: {
       roundCount: 8,
+      courtCount: null,
       scoring: { total: DEFAULT_SCORING.total, table: [...DEFAULT_SCORING.table] },
       bye: { scoreFor: 13, scoreAgainst: 7 },
     },
@@ -47,5 +49,6 @@ export function parseTournament(json: string): Tournament {
   if (!data || typeof data !== 'object' || data.schemaVersion !== SCHEMA_VERSION || !Array.isArray(data.teams) || !Array.isArray(data.rounds)) {
     throw new Error("Ce fichier n'est pas une sauvegarde de tournoi valide.");
   }
+  migrateCourts(data.rounds);
   return data as Tournament;
 }

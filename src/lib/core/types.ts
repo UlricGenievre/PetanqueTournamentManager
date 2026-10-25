@@ -21,11 +21,14 @@ export interface Match {
   teamB: string | null;
   scoreA: number | null;
   scoreB: number | null;
+  /** Terrain attribué ; `null` (ou absent) : la rencontre attend qu'un terrain se libère. */
+  court?: number | null;
+  /** Terrain donné à une autre rencontre avant la saisie du score : celle-ci est terminée. */
+  courtFreed?: boolean;
 }
 
 export interface Round {
   number: number;
-  /** L'ordre des matchs donne le numéro de terrain (1, 2, 3…). */
   matches: Match[];
 }
 
@@ -47,6 +50,8 @@ export interface ByeSettings {
 
 export interface Settings {
   roundCount: number;
+  /** Terrains disponibles, numérotés de 1 à n ; `null` (ou absent) : un terrain par rencontre. */
+  courtCount?: number | null;
   scoring: ScoringSettings;
   bye: ByeSettings;
 }

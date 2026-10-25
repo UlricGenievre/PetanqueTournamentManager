@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import fixture from './__fixtures__/montesquieu-2025.json';
+import { assignCourts, courtConflicts, freeCourts, migrateCourts, setCourt, teamsReady } from './courts';
 import { drawRound, meetings, sameClub, sameSector, validateRound } from './pairing';
 import { DEFAULT_SCORING, matchPoints } from './scoring';
 import { computeStandings } from './standings';
-import { clubFromTeamName, createTournament, parseTeamLines } from './tournament';
-import type { Tournament } from './types';
+import { clubFromTeamName, createTournament, parseTeamLines, parseTournament } from './tournament';
+import type { Round, Tournament } from './types';
 
 /** Tournoi 2025 reconstruit à partir de l'Excel (id d'équipe = son numéro). */
 function tournament2025(): Tournament {
@@ -226,5 +227,155 @@ describe('équipes', () => {
     expect(sameSector(a, b)).toBe(true);
     expect(sameSector(a, c)).toBe(false);
     expect(sameSector(d, { ...d, id: 'x' })).toBe(false);
+  });
+});
+
+describe('terrains', () => {
+  /** 9 équipes : 4 rencontres et un exempt par partie, sur 2 terrains. */
+  function drawn() {
+    const t = createTournament();
+    t.teams = parseTeamLines('A\nB\nC\nD\nE\nF\nG\nH\nI');
+    t.settings.courtCount = 2;
+    const round = drawNext(t);
+    return { t, round, playable: round.matches.filter((m) => m.teamB !== null), bye: round.matches.find((m) => m.teamB === null)! };
+  }
+
+  function drawNext(t: Tournament) {
+    const number = t.rounds.length + 1;
+    t.rounds.push({ number, matches: drawRound(t, number, seeded(number)).matches });
+    assignCourts(t);
+    return t.rounds[number - 1];
+  }
+
+  const score = (m: { scoreA: number | null; scoreB: number | null }) => ((m.scoreA = 13), (m.scoreB = 7));
+  const courts = (round: Round) => round.matches.filter((m) => m.teamB !== null).map((m) => m.court);
+
+  it('au tirage, les premières rencontres reçoivent les terrains, les autres attendent', () => {
+    const { playable, bye } = drawn();
+    expect(playable.map((m) => m.court)).toEqual([1, 2, null, null]);
+    expect(bye.court).toBeNull();
+  });
+
+  it('un score saisi libère le terrain pour la rencontre suivante', () => {
+    const { t, playable } = drawn();
+    score(playable[1]);
+    assignCourts(t);
+    expect(playable.map((m) => m.court)).toEqual([1, 2, 2, null]);
+    score(playable[0]);
+    assignCourts(t);
+    expect(playable.map((m) => m.court)).toEqual([1, 2, 2, 1]);
+    expect(freeCourts(t)).toEqual([]);
+  });
+
+  it('un score incomplet ne libère pas le terrain', () => {
+    const { t, playable } = drawn();
+    playable[0].scoreA = 13;
+    assignCourts(t);
+    expect(playable[2].court).toBeNull();
+  });
+
+  it('terrain donné à la main : la rencontre qui l’occupait est terminée', () => {
+    const { t, round, playable } = drawn();
+    setCourt(t, playable[3], 1);
+    expect(playable[0].courtFreed).toBe(true);
+    // Le score de la première rencontre arrive ensuite : aucun terrain ne se libère.
+    score(playable[0]);
+    assignCourts(t);
+    expect(playable.map((m) => m.court)).toEqual([1, 2, null, 1]);
+    expect(courtConflicts(t, round)).toEqual([]);
+  });
+
+  it('corriger le terrain d’une rencontre terminée ne libère personne', () => {
+    const { t, playable } = drawn();
+    score(playable[0]);
+    setCourt(t, playable[0], 2);
+    expect(playable[1].courtFreed).toBeUndefined();
+  });
+
+  it('plus de terrains : les rencontres en attente en profitent', () => {
+    const { t, playable } = drawn();
+    t.settings.courtCount = 3;
+    assignCourts(t);
+    expect(playable.map((m) => m.court)).toEqual([1, 2, 3, null]);
+  });
+
+  it('sans nombre de terrains, chaque rencontre a le sien', () => {
+    const { t, round, playable } = drawn();
+    for (const m of round.matches) m.court = null;
+    t.settings.courtCount = null;
+    assignCourts(t);
+    expect(playable.map((m) => m.court)).toEqual([1, 2, 3, 4]);
+  });
+
+  it('score effacé après réattribution : conflit signalé', () => {
+    const { t, round, playable } = drawn();
+    score(playable[0]);
+    assignCourts(t);
+    playable[0].scoreA = null;
+    expect(courtConflicts(t, round)).toEqual([1]);
+  });
+
+  describe('parties qui se chevauchent', () => {
+    /** Partie 1 sur 4 terrains, deux rencontres terminées, puis tirage de la partie 2. */
+    function overlapping() {
+      const { t, round: r1, playable } = drawn();
+      t.settings.courtCount = 4;
+      assignCourts(t);
+      score(playable[0]);
+      score(playable[1]);
+      const r2 = drawNext(t);
+      return { t, r1, r2, done: new Set([playable[0], playable[1]].flatMap((m) => [m.teamA, m.teamB])) };
+    }
+
+    it('la partie suivante ne prend que les terrains libérés', () => {
+      const { t, r1, r2 } = overlapping();
+      expect(courts(r1)).toEqual([1, 2, 3, 4]);
+      const used = courts(r2).filter((c) => c !== null);
+      expect(used.every((c) => c === 1 || c === 2)).toBe(true);
+      expect(freeCourts(t).length).toBe(2 - used.length);
+    });
+
+    it('une rencontre attend que ses deux équipes aient fini la partie précédente', () => {
+      const { t, r1, r2, done } = overlapping();
+      done.add(r1.matches.find((m) => m.teamB === null)!.teamA); // l'exempte n'a pas joué
+      for (const m of r2.matches.filter((x) => x.teamB !== null)) {
+        expect(teamsReady(t, r2, m)).toBe(done.has(m.teamA) && done.has(m.teamB!));
+        if (!teamsReady(t, r2, m)) expect(m.court).toBeNull();
+      }
+    });
+
+    it('un score de la partie 1 libère son terrain et rend prêtes ses équipes', () => {
+      const { t, r1, r2 } = overlapping();
+      for (const m of r1.matches) if (m.teamB !== null && m.scoreA === null) score(m);
+      assignCourts(t);
+      expect(r2.matches.filter((m) => m.teamB !== null).every((m) => m.court !== null)).toBe(true);
+      expect(new Set(courts(r2)).size).toBe(4);
+    });
+
+    it('les rencontres en attente de la partie précédente passent avant la suivante', () => {
+      const t = createTournament();
+      t.teams = parseTeamLines('A\nB\nC\nD\nE\nF');
+      t.settings.courtCount = 1;
+      const [a, b, c, d, e, f] = t.teams.map((x) => x.id);
+      const match = (teamA: string, teamB: string, court: number | null = null) => ({ id: teamA + teamB, teamA, teamB, scoreA: null, scoreB: null, court });
+      t.rounds = [
+        { number: 1, matches: [match(a, b, 1), match(c, d), match(e, f)] },
+        { number: 2, matches: [match(a, b)] }, // A et B seront prêtes, mais C-D attend depuis la partie 1
+      ];
+      score(t.rounds[0].matches[0]);
+      assignCourts(t);
+      expect(t.rounds[0].matches[1].court).toBe(1);
+      expect(t.rounds[1].matches[0].court).toBeNull();
+    });
+  });
+
+  it('anciennes sauvegardes : l’ordre des rencontres donne le terrain', () => {
+    const t = tournament2025();
+    const json = JSON.stringify(t);
+    expect(json).not.toContain('"court"');
+    const loaded = parseTournament(json);
+    expect(loaded.rounds[0].matches.slice(0, 3).map((m) => m.court)).toEqual([1, 2, 3]);
+    migrateCourts(loaded.rounds); // sans effet la deuxième fois
+    expect(loaded.rounds[0].matches[2].court).toBe(3);
   });
 });

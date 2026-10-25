@@ -30,14 +30,14 @@ export function exportXlsx(t: Tournament): void {
 
   const matchRows: Cell[][] = [['Partie', 'Terrain', 'N° A', 'Équipe A', 'Score A', 'Score B', 'Équipe B', 'N° B', 'Points A', 'Points B']];
   for (const round of t.rounds) {
-    round.matches.forEach((m, i) => {
+    for (const m of round.matches) {
       const a = byId.get(m.teamA);
       const b = m.teamB === null ? null : byId.get(m.teamB);
       const scores = effectiveScores(m, t.settings);
       const points = scores ? matchPoints(scores[0], scores[1], t.settings.scoring) : null;
       matchRows.push([
         round.number,
-        m.teamB === null ? null : i + 1,
+        m.teamB === null ? null : (m.court ?? null),
         a?.number ?? null,
         a?.name ?? '?',
         scores?.[0] ?? null,
@@ -47,7 +47,7 @@ export function exportXlsx(t: Tournament): void {
         points?.[0] ?? null,
         m.teamB === null ? null : (points?.[1] ?? null),
       ]);
-    });
+    }
   }
   utils.book_append_sheet(wb, sheet(matchRows, [7, 8, 6, 28, 8, 8, 28, 6, 9, 9]), 'Rencontres');
 

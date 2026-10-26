@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import fixture from './__fixtures__/montesquieu-2025.json';
-import { assignCourts, closedCourtsInUse, courtConflicts, formatCourtList, freeCourts, migrateCourts, parseCourtList, setCourt, teamsReady } from './courts';
+import { assignCourts, closedCourtsInUse, courtBoard, courtConflicts, formatCourtList, freeCourts, migrateCourts, parseCourtList, setCourt, teamsReady } from './courts';
 import { drawRound, meetings, sameClub, sameSector, validateRound } from './pairing';
 import { DEFAULT_SCORING, matchPoints } from './scoring';
 import { computeStandings } from './standings';
@@ -461,6 +461,22 @@ describe('terrains', () => {
       t.settings.closedCourts = [{ courts: [2, 3], fromRound: 1 }];
       assignCourts(t);
       expect(playable.map((m) => m.court)).toEqual([1, 4, 5, 6]);
+    });
+
+    it('tableau des terrains : rencontres en cours et neutralisations vues depuis la dernière partie', () => {
+      const { t, playable } = drawn();
+      t.settings.courtCount = 4;
+      t.settings.closedCourts = [{ courts: [1], fromRound: 1 }, { courts: [4], fromRound: 3 }];
+      const board = courtBoard(t);
+      expect(board.map((c) => c.court)).toEqual([1, 2, 3, 4]);
+      // Le terrain 1, neutralisé après coup, est encore occupé par sa rencontre.
+      expect(board[0]).toMatchObject({ open: false, closedFrom: 1, playing: [{ match: playable[0], round: 1 }] });
+      expect(board[2]).toMatchObject({ open: true, closedFrom: null, playing: [] });
+      expect(board[3]).toMatchObject({ open: true, closedFrom: 3 });
+      t.settings.courtCount = 1;
+      t.settings.closedCourts = [];
+      // Terrain 2 retiré mais encore occupé : affiché ; terrains 3 et 4 : plus affichés.
+      expect(courtBoard(t).map((c) => [c.court, c.open])).toEqual([[1, true], [2, false]]);
     });
 
     it('saisie des numéros', () => {

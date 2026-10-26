@@ -16,6 +16,8 @@ réparti selon l'écart de score.
   la main, quand on sait qu'il est libre avant d'avoir le score. Des terrains peuvent être
   neutralisés pour tout le tournoi ou à partir d'une partie donnée ; les terrains sont
   redistribués à chaque modification (nombre, neutralisation, terrain indiqué à la main).
+  L'onglet « Terrains » montre la rencontre en cours sur chaque terrain et signale les
+  terrains neutralisés.
 - **Scores** : on ne saisit que les scores ; points gagnés, différence et classement sont calculés.
 - **Classement** en direct et après chaque partie (départage : points gagnés, points réalisés, différence).
 - **Impressions** : liste des rencontres, fiches de match à découper, classements.

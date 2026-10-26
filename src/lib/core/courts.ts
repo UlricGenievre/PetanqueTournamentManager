@@ -106,6 +106,42 @@ export function closedCourtsInUse(t: Tournament, round: Round): number[] {
   return [...new Set(courts)].sort((a, b) => a - b);
 }
 
+/** Première partie à partir de laquelle le terrain est neutralisé, ou `null`. */
+export function closedFrom(settings: Settings, court: number): number | null {
+  const rounds = (settings.closedCourts ?? []).filter((c) => c.courts.includes(court)).map((c) => c.fromRound);
+  return rounds.length ? Math.min(...rounds) : null;
+}
+
+export interface CourtStatus {
+  court: number;
+  /** Rencontres en cours sur ce terrain, avec leur partie (plusieurs : conflit). */
+  playing: { match: Match; round: number }[];
+  /** Le terrain peut être donné aux rencontres de la dernière partie tirée. */
+  open: boolean;
+  closedFrom: number | null;
+}
+
+/**
+ * État de chaque terrain, vu depuis la dernière partie tirée. Sans nombre de terrains réglé,
+ * on montre les terrains jusqu'au plus grand numéro utilisé ou neutralisé ; un terrain au-delà
+ * du nombre réglé n'apparaît que s'il est encore occupé.
+ */
+export function courtBoard(t: Tournament): CourtStatus[] {
+  const current = Math.max(1, ...t.rounds.map((r) => r.number));
+  const playing = new Map<number, CourtStatus['playing']>();
+  for (const r of [...t.rounds].sort((a, b) => a.number - b.number)) {
+    for (const m of r.matches.filter(occupiesCourt)) playing.set(m.court!, [...(playing.get(m.court!) ?? []), { match: m, round: r.number }]);
+  }
+  const closed = (t.settings.closedCourts ?? []).flatMap((c) => c.courts);
+  const last = Math.max(t.settings.courtCount ?? Math.max(0, ...closed), ...playing.keys());
+  return Array.from({ length: last }, (_, i) => i + 1).map((court) => ({
+    court,
+    playing: playing.get(court) ?? [],
+    open: isCourtOpen(t.settings, court, current),
+    closedFrom: closedFrom(t.settings, court),
+  }));
+}
+
 /** Rencontres en cours que l'attribution du terrain `court` à `match` considère comme terminées. */
 export function displacedBy(t: Tournament, match: Match, court: number | null): Match[] {
   if (court === null || match.teamB === null || isScored(match)) return [];

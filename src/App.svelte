@@ -3,12 +3,13 @@
   import { canUseFileSystem } from './lib/persistence';
   import { app } from './lib/store.svelte';
   import PrintArea from './print/PrintArea.svelte';
+  import CourtsView from './views/CourtsView.svelte';
   import RoundsView from './views/RoundsView.svelte';
   import SettingsView from './views/SettingsView.svelte';
   import StandingsView from './views/StandingsView.svelte';
   import TeamsView from './views/TeamsView.svelte';
 
-  type Tab = 'settings' | 'teams' | 'rounds' | 'standings';
+  type Tab = 'settings' | 'teams' | 'rounds' | 'courts' | 'standings';
   let tab = $state<Tab>(app.tournament.teams.length ? 'rounds' : 'teams');
 
   onMount(() => void app.init());
@@ -22,6 +23,7 @@
   const tabs: { id: Tab; label: () => string }[] = [
     { id: 'teams', label: () => `Équipes (${app.tournament.teams.length})` },
     { id: 'rounds', label: () => 'Parties & scores' },
+    { id: 'courts', label: () => 'Terrains' },
     { id: 'standings', label: () => 'Classement' },
     { id: 'settings', label: () => 'Tournoi & fichier' },
   ];
@@ -90,6 +92,8 @@
       <TeamsView />
     {:else if tab === 'rounds'}
       <RoundsView />
+    {:else if tab === 'courts'}
+      <CourtsView />
     {:else if tab === 'standings'}
       <StandingsView />
     {:else}

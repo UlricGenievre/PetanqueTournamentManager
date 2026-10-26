@@ -48,10 +48,18 @@ export interface ByeSettings {
   scoreAgainst: number;
 }
 
+export interface CourtClosure {
+  courts: number[];
+  /** 1 : neutralisé pendant tout le tournoi. */
+  fromRound: number;
+}
+
 export interface Settings {
   roundCount: number;
   /** Terrains disponibles, numérotés de 1 à n ; `null` (ou absent) : un terrain par rencontre. */
   courtCount?: number | null;
+  /** Terrains neutralisés : ils ne sont plus donnés aux rencontres des parties `fromRound` et suivantes. */
+  closedCourts?: CourtClosure[];
   scoring: ScoringSettings;
   bye: ByeSettings;
 }

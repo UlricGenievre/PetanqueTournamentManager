@@ -13,7 +13,9 @@ réparti selon l'écart de score.
   Les parties s'enchaînent sans attendre la fin de la précédente : une rencontre reçoit un
   terrain libre dès que ses deux équipes ont fini leur partie précédente, et un terrain ne se
   libère que lorsque le score de sa rencontre est saisi. Le terrain peut aussi être indiqué à
-  la main, quand on sait qu'il est libre avant d'avoir le score.
+  la main, quand on sait qu'il est libre avant d'avoir le score. Des terrains peuvent être
+  neutralisés pour tout le tournoi ou à partir d'une partie donnée ; les terrains sont
+  redistribués à chaque modification (nombre, neutralisation, terrain indiqué à la main).
 - **Scores** : on ne saisit que les scores ; points gagnés, différence et classement sont calculés.
 - **Classement** en direct et après chaque partie (départage : points gagnés, points réalisés, différence).
 - **Impressions** : liste des rencontres, fiches de match à découper, classements.

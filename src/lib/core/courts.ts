@@ -4,8 +4,10 @@
  * libres, les autres attendent ; un terrain se libère quand le score de la rencontre qui
  * l'occupe est saisi (ou quand on le donne à la main à une autre rencontre) et passe alors
  * à la rencontre suivante dont les deux équipes ont fini leurs parties précédentes.
+ * Un terrain neutralisé à partir d'une partie n'est plus donné aux rencontres de cette
+ * partie et des suivantes ; la rencontre qui l'occupe va jusqu'au bout.
  */
-import type { Match, Round, Tournament } from './types';
+import type { Match, Round, Settings, Tournament } from './types';
 
 const isScored = (m: Match) => m.scoreA !== null && m.scoreB !== null;
 
@@ -45,36 +47,45 @@ function busyCourts(t: Tournament): Set<number> {
   return new Set(t.rounds.flatMap((r) => r.matches.filter(occupiesCourt).map((m) => m.court!)));
 }
 
-/** Terrains libres ; sans nombre de terrains réglé, il n'y a pas de liste à afficher. */
-export function freeCourts(t: Tournament): number[] {
+/** Le terrain existe et n'est pas neutralisé pour les rencontres de la partie `roundNumber`. */
+export function isCourtOpen(settings: Settings, court: number, roundNumber: number): boolean {
+  if (court < 1 || (settings.courtCount != null && court > settings.courtCount)) return false;
+  return !(settings.closedCourts ?? []).some((c) => roundNumber >= c.fromRound && c.courts.includes(court));
+}
+
+/** Terrains libres pour la partie `roundNumber` ; sans nombre de terrains réglé, il n'y a pas de liste à afficher. */
+export function freeCourts(t: Tournament, roundNumber: number): number[] {
   const n = t.settings.courtCount;
   if (n == null) return [];
   const busy = busyCourts(t);
-  return Array.from({ length: n }, (_, i) => i + 1).filter((c) => !busy.has(c));
+  return Array.from({ length: n }, (_, i) => i + 1).filter((c) => !busy.has(c) && isCourtOpen(t.settings, c, roundNumber));
 }
 
 /**
  * Donne les terrains libres aux rencontres en attente dont les équipes sont prêtes,
- * partie par partie puis dans l'ordre des rencontres. Sans nombre de terrains réglé,
- * chaque rencontre prête reçoit le plus petit numéro libre.
+ * partie par partie puis dans l'ordre des rencontres. Chaque rencontre prête reçoit le
+ * plus petit numéro libre et ouvert pour sa partie. À rappeler après toute modification
+ * (score, tirage, terrain donné à la main, nombre de terrains, neutralisations).
  */
 export function assignCourts(t: Tournament): void {
   const limit = t.settings.courtCount ?? Infinity;
   const busy = busyCourts(t);
   const busyTeams = busyTeamsByRound(t);
-  let next = 1;
-  const takeCourt = () => {
-    while (busy.has(next)) next++;
-    if (next > limit) return null;
-    busy.add(next);
-    return next;
+  const takeCourt = (roundNumber: number) => {
+    for (let c = 1; c <= limit; c++) {
+      if (busy.has(c) || !isCourtOpen(t.settings, c, roundNumber)) continue;
+      busy.add(c);
+      return c;
+    }
+    return null;
   };
   const rounds = [...t.rounds].sort((a, b) => a.number - b.number);
   for (const round of rounds) {
     const earlier = rounds.filter((r) => r.number < round.number).map((r) => busyTeams.get(r.number)!);
     for (const m of round.matches) {
       if (!isWaiting(m) || earlier.some((busy) => busy.has(m.teamA) || busy.has(m.teamB!))) continue;
-      const court = takeCourt();
+      const court = takeCourt(round.number);
+      // Une partie suivante n'a pas plus de terrains ouverts : les neutralisations ne font que s'ajouter.
       if (court === null) return;
       m.court = court;
     }
@@ -87,6 +98,12 @@ export function courtConflicts(t: Tournament, round: Round): number[] {
   for (const r of t.rounds) for (const m of r.matches) if (occupiesCourt(m)) counts.set(m.court!, (counts.get(m.court!) ?? 0) + 1);
   const mine = new Set(round.matches.filter(occupiesCourt).map((m) => m.court!));
   return [...mine].filter((c) => counts.get(c)! > 1).sort((a, b) => a - b);
+}
+
+/** Terrains neutralisés (ou au-delà du nombre de terrains) où une rencontre de `round` est en cours. */
+export function closedCourtsInUse(t: Tournament, round: Round): number[] {
+  const courts = round.matches.filter((m) => occupiesCourt(m) && !isCourtOpen(t.settings, m.court!, round.number)).map((m) => m.court!);
+  return [...new Set(courts)].sort((a, b) => a - b);
 }
 
 /** Rencontres en cours que l'attribution du terrain `court` à `match` considère comme terminées. */
@@ -109,4 +126,29 @@ export function migrateCourts(rounds: Round[]): void {
     let next = 1;
     for (const m of round.matches) m.court = m.teamB === null ? null : next++;
   }
+}
+
+/** « 4, 9, 12-14 » → [4, 9, 12, 13, 14] ; les numéros hors de 1 à 99 sont ignorés. */
+export function parseCourtList(text: string): number[] {
+  const courts = new Set<number>();
+  for (const part of text.replace(/\s*-\s*/g, '-').split(/[\s,;]+/)) {
+    const m = part.match(/^(\d+)(?:-(\d+))?$/);
+    if (!m) continue;
+    const [a, b] = [Number(m[1]), Number(m[2] ?? m[1])];
+    for (let c = Math.max(1, Math.min(a, b)); c <= Math.min(99, Math.max(a, b)); c++) courts.add(c);
+  }
+  return [...courts].sort((a, b) => a - b);
+}
+
+/** [4, 9, 12, 13, 14] → « 4, 9, 12-14 ». */
+export function formatCourtList(courts: number[]): string {
+  const parts: string[] = [];
+  const sorted = [...courts].sort((a, b) => a - b);
+  for (let i = 0; i < sorted.length; ) {
+    let j = i;
+    while (j + 1 < sorted.length && sorted[j + 1] === sorted[j] + 1) j++;
+    parts.push(j - i >= 2 ? `${sorted[i]}-${sorted[j]}` : sorted.slice(i, j + 1).join(', '));
+    i = j + 1;
+  }
+  return parts.join(', ');
 }

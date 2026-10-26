@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import fixture from './__fixtures__/montesquieu-2025.json';
-import { assignCourts, courtConflicts, freeCourts, migrateCourts, setCourt, teamsReady } from './courts';
+import { assignCourts, closedCourtsInUse, courtConflicts, formatCourtList, freeCourts, migrateCourts, parseCourtList, setCourt, teamsReady } from './courts';
 import { drawRound, meetings, sameClub, sameSector, validateRound } from './pairing';
 import { DEFAULT_SCORING, matchPoints } from './scoring';
 import { computeStandings } from './standings';
@@ -264,7 +264,7 @@ describe('terrains', () => {
     score(playable[0]);
     assignCourts(t);
     expect(playable.map((m) => m.court)).toEqual([1, 2, 2, 1]);
-    expect(freeCourts(t)).toEqual([]);
+    expect(freeCourts(t, 1)).toEqual([]);
   });
 
   it('un score incomplet ne libère pas le terrain', () => {
@@ -332,7 +332,7 @@ describe('terrains', () => {
       expect(courts(r1)).toEqual([1, 2, 3, 4]);
       const used = courts(r2).filter((c) => c !== null);
       expect(used.every((c) => c === 1 || c === 2)).toBe(true);
-      expect(freeCourts(t).length).toBe(2 - used.length);
+      expect(freeCourts(t, 2).length).toBe(2 - used.length);
     });
 
     it('une rencontre attend que ses deux équipes aient fini la partie précédente', () => {
@@ -366,6 +366,108 @@ describe('terrains', () => {
       assignCourts(t);
       expect(t.rounds[0].matches[1].court).toBe(1);
       expect(t.rounds[1].matches[0].court).toBeNull();
+    });
+  });
+
+  it('terrain donné à la main : le terrain quitté va à une rencontre en attente', () => {
+    const { t, playable } = drawn();
+    t.settings.courtCount = 3;
+    assignCourts(t);
+    expect(playable.map((m) => m.court)).toEqual([1, 2, 3, null]);
+    setCourt(t, playable[2], 1);
+    assignCourts(t);
+    // La rencontre 1 est considérée comme terminée ; le terrain 3 passe à la rencontre en attente.
+    expect(playable.map((m) => m.court)).toEqual([1, 2, 1, 3]);
+  });
+
+  it('moins de terrains : les rencontres en cours finissent, le terrain retiré n’est plus donné', () => {
+    const { t, round, playable } = drawn();
+    t.settings.courtCount = 1;
+    assignCourts(t);
+    expect(closedCourtsInUse(t, round)).toEqual([2]);
+    score(playable[1]);
+    assignCourts(t);
+    expect(playable.map((m) => m.court)).toEqual([1, 2, null, null]);
+    score(playable[0]);
+    assignCourts(t);
+    expect(playable[2].court).toBe(1);
+  });
+
+  describe('terrains neutralisés', () => {
+    it('pendant tout le tournoi : jamais attribués', () => {
+      const t = createTournament();
+      t.teams = parseTeamLines('A\nB\nC\nD\nE\nF\nG\nH');
+      t.settings.courtCount = 4;
+      t.settings.closedCourts = [{ courts: [1, 3], fromRound: 1 }];
+      t.rounds.push({ number: 1, matches: drawRound(t, 1, seeded(1)).matches });
+      assignCourts(t);
+      expect(courts(t.rounds[0])).toEqual([2, 4, null, null]);
+      expect(freeCourts(t, 1)).toEqual([]);
+    });
+
+    it('neutralisation après coup : la rencontre en cours finit, puis le terrain n’est plus donné', () => {
+      const { t, round, playable } = drawn();
+      t.settings.closedCourts = [{ courts: [1], fromRound: 1 }];
+      assignCourts(t);
+      expect(playable[0].court).toBe(1);
+      expect(closedCourtsInUse(t, round)).toEqual([1]);
+      score(playable[0]);
+      assignCourts(t);
+      expect(playable.map((m) => m.court)).toEqual([1, 2, null, null]);
+      score(playable[1]);
+      assignCourts(t);
+      expect(playable[2].court).toBe(2);
+    });
+
+    it('à partir d’une partie : encore donnés aux rencontres des parties précédentes', () => {
+      const t = createTournament();
+      t.teams = parseTeamLines('A\nB\nC\nD\nE\nF');
+      t.settings.courtCount = 2;
+      t.settings.closedCourts = [{ courts: [1], fromRound: 2 }];
+      const [a, b, c, d, e, f] = t.teams.map((x) => x.id);
+      const match = (teamA: string, teamB: string, court: number | null = null) => ({ id: teamA + teamB, teamA, teamB, scoreA: null, scoreB: null, court });
+      t.rounds = [
+        { number: 1, matches: [match(a, b, 1), match(c, d, 2), match(e, f)] },
+        { number: 2, matches: [match(a, c), match(b, d)] },
+      ];
+      score(t.rounds[0].matches[0]);
+      assignCourts(t);
+      // E-F (partie 1) prend le terrain 1, neutralisé seulement à partir de la partie 2.
+      expect(t.rounds[0].matches[2].court).toBe(1);
+      score(t.rounds[0].matches[1]);
+      score(t.rounds[0].matches[2]);
+      assignCourts(t);
+      // Partie 2 : seul le terrain 2 reste ouvert.
+      expect(courts(t.rounds[1])).toEqual([2, null]);
+      expect(freeCourts(t, 1)).toEqual([1]);
+      expect(freeCourts(t, 2)).toEqual([]);
+    });
+
+    it('neutralisation retirée : le terrain revient aux rencontres en attente', () => {
+      const { t, playable } = drawn();
+      t.settings.courtCount = 3;
+      t.settings.closedCourts = [{ courts: [3], fromRound: 1 }];
+      assignCourts(t);
+      expect(playable.map((m) => m.court)).toEqual([1, 2, null, null]);
+      t.settings.closedCourts = [];
+      assignCourts(t);
+      expect(playable.map((m) => m.court)).toEqual([1, 2, 3, null]);
+    });
+
+    it('sans nombre de terrains, les numéros neutralisés sont sautés', () => {
+      const { t, round, playable } = drawn();
+      for (const m of round.matches) m.court = null;
+      t.settings.courtCount = null;
+      t.settings.closedCourts = [{ courts: [2, 3], fromRound: 1 }];
+      assignCourts(t);
+      expect(playable.map((m) => m.court)).toEqual([1, 4, 5, 6]);
+    });
+
+    it('saisie des numéros', () => {
+      expect(parseCourtList('9, 4 ;12 - 14  4 x 0 120')).toEqual([4, 9, 12, 13, 14]);
+      expect(parseCourtList('14-12')).toEqual([12, 13, 14]);
+      expect(parseCourtList('')).toEqual([]);
+      expect(formatCourtList([14, 4, 12, 13, 9, 10])).toBe('4, 9, 10, 12-14');
     });
   });
 

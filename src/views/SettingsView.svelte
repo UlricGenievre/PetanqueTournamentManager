@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { assignCourts } from '../lib/core/courts';
+  import { assignCourts, formatCourtList, parseCourtList } from '../lib/core/courts';
+  import type { CourtClosure } from '../lib/core/types';
   import { DEFAULT_SCORING } from '../lib/core/scoring';
   import { exportXlsx } from '../lib/export-xlsx';
   import { canUseFileSystem } from '../lib/persistence';
@@ -40,6 +41,22 @@
     assignCourts(t);
   }
 
+  /** Toute neutralisation modifiée redonne les terrains : ceux qui se ferment ne sont plus attribués. */
+  function setClosedCourts(closures: CourtClosure[]) {
+    s.closedCourts = closures;
+    assignCourts(t);
+  }
+
+  function updateClosure(i: number, change: Partial<CourtClosure>) {
+    setClosedCourts((s.closedCourts ?? []).map((c, j) => (j === i ? { ...c, ...change } : c)));
+  }
+
+  function setClosureRound(i: number, input: HTMLInputElement) {
+    const n = Number(input.value);
+    if (Number.isInteger(n) && n >= 1) updateClosure(i, { fromRound: Math.min(n, s.roundCount) });
+    input.value = String(s.closedCourts![i].fromRound);
+  }
+
   const isDefaultScoring = $derived(s.scoring.total === DEFAULT_SCORING.total && s.scoring.table.join() === DEFAULT_SCORING.table.join());
 </script>
 
@@ -73,6 +90,33 @@
       équipes ont fini leur partie précédente ; un terrain se libère à la saisie du score. Sans nombre, chaque rencontre
       a son terrain.
     </p>
+
+    <h3>Terrains neutralisés</h3>
+    <p class="muted small">
+      Ces terrains ne sont plus attribués aux rencontres de la partie indiquée et des suivantes (partie 1 : pendant tout le
+      tournoi). Une rencontre déjà en cours sur l'un d'eux peut finir. Exemple : « 4, 9, 12-14 ».
+    </p>
+    {#each s.closedCourts ?? [] as closure, i (i)}
+      <div class="row closure">
+        <label class="grow">
+          Terrains
+          <input
+            value={formatCourtList(closure.courts)}
+            placeholder="4, 9, 12-14"
+            onchange={(e) => {
+              updateClosure(i, { courts: parseCourtList(e.currentTarget.value) });
+              e.currentTarget.value = formatCourtList(s.closedCourts![i].courts);
+            }}
+          />
+        </label>
+        <label>
+          Dès la partie
+          <input class="short" type="number" min="1" max={s.roundCount} value={closure.fromRound} onchange={(e) => setClosureRound(i, e.currentTarget)} />
+        </label>
+        <button class="link" onclick={() => setClosedCourts((s.closedCourts ?? []).filter((_, j) => j !== i))} title="Retirer cette neutralisation" aria-label="Retirer cette neutralisation">✕</button>
+      </div>
+    {/each}
+    <button class="link add-closure" onclick={() => (s.closedCourts = [...(s.closedCourts ?? []), { courts: [], fromRound: 1 }])}>+ Neutraliser des terrains</button>
 
     <h3>Équipe exempte (nombre impair d'équipes)</h3>
     <p class="muted small">Score forfaitaire attribué à l'équipe qui ne joue pas.</p>
@@ -186,6 +230,27 @@
 
   .dash {
     padding-bottom: 0.4em;
+  }
+
+  .closure {
+    align-items: flex-end;
+    margin-bottom: 0.5rem;
+  }
+
+  .closure .grow {
+    flex: 1 1 8em;
+  }
+
+  .closure .grow input {
+    width: 100%;
+  }
+
+  .closure .link {
+    padding-bottom: 0.5em;
+  }
+
+  .add-closure {
+    margin-bottom: 1.25rem;
   }
 
   .scoring {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { tick } from 'svelte';
-  import { assignCourts, courtConflicts, displacedBy, freeCourts, isWaiting, setCourt, teamsReady } from '../lib/core/courts';
+  import { assignCourts, closedCourtsInUse, courtConflicts, displacedBy, freeCourts, isCourtOpen, isWaiting, setCourt, teamsReady } from '../lib/core/courts';
   import { newId } from '../lib/core/ids';
   import { drawRound, validateRound, type DrawLevel, type RoundIssue } from '../lib/core/pairing';
   import { effectiveScores, matchPoints } from '../lib/core/scoring';
@@ -27,7 +27,8 @@
   const canDraw = $derived(selected === t.rounds.length + 1 && t.teams.length >= 2);
   const issues = $derived(round ? validateRound(t, round) : []);
   const conflicts = $derived(round ? courtConflicts(t, round) : []);
-  const free = $derived(freeCourts(t));
+  const closedInUse = $derived(round ? closedCourtsInUse(t, round) : []);
+  const free = $derived(round ? freeCourts(t, round.number) : []);
   const waiting = $derived(round ? round.matches.filter(isWaiting) : []);
   /** Rencontres en attente dont une équipe joue encore une partie précédente. */
   const notReady = $derived(round ? new Set(waiting.filter((m) => !teamsReady(t, round, m))) : new Set<Match>());
@@ -99,12 +100,17 @@
       alert(`Les terrains sont numérotés de 1 à ${max}.`);
       return revert();
     }
+    if (court !== null && !isCourtOpen(t.settings, court, round.number)) {
+      if (!confirm(`Le terrain ${court} est neutralisé pour la partie ${round.number}. L'attribuer quand même à cette rencontre ?`)) return revert();
+    }
     const displaced = displacedBy(t, match, court);
     if (displaced.length) {
       const names = displaced.map((m) => `${teamLabel(m.teamA)} contre ${teamLabel(m.teamB)}${partOf(m)}`).join(', ');
       if (!confirm(`Le terrain ${court} est occupé par « ${names} », dont le score n'est pas encore saisi. Considérer cette rencontre comme terminée ?`)) return revert();
     }
     setCourt(t, match, court);
+    // Le terrain quitté, et celui des rencontres considérées comme terminées, vont aux rencontres en attente.
+    assignCourts(t);
   }
 
   /** « (partie 1) » pour une rencontre d'une autre partie que celle affichée. */
@@ -243,11 +249,12 @@
     {#if drawMessage && drawMessage.round === round.number}
       <div class="notice warn">{levelText[drawMessage.level]}</div>
     {/if}
-    {#if issues.length || conflicts.length}
+    {#if issues.length || conflicts.length || closedInUse.length}
       <div class="notice warn issues">
         <ul>
           {#each issues as issue, i (i)}<li>{issueText(issue)}</li>{/each}
           {#each conflicts as court (court)}<li>Plusieurs rencontres en cours sur le terrain {court}</li>{/each}
+          {#each closedInUse as court (court)}<li>Rencontre en cours sur le terrain {court}, neutralisé pour cette partie : elle peut finir, ou être déplacée en indiquant un autre terrain</li>{/each}
         </ul>
       </div>
     {/if}

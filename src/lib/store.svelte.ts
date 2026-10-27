@@ -103,6 +103,15 @@ class AppStore {
     storage.downloadJson($state.snapshot(this.tournament));
   }
 
+  /** Demande confirmation avant de remplacer le tournoi en cours (nouveau tournoi ou ouverture d'un fichier). */
+  confirmLeave(): boolean {
+    if (this.tournament.teams.length === 0) return true;
+    const where = this.fileHandle
+      ? `Il reste enregistré dans « ${this.fileHandle.name} ».`
+      : "Il n'est enregistré dans aucun fichier : téléchargez d'abord une sauvegarde si vous voulez le garder.";
+    return confirm(`Fermer le tournoi « ${this.tournament.name} » ? ${where}`);
+  }
+
   newTournament() {
     this.tournament = createTournament();
     this.#link(null);

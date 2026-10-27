@@ -50,15 +50,23 @@ export interface ByeSettings {
 
 export interface CourtClosure {
   courts: number[];
-  /** 1 : neutralisé pendant tout le tournoi. */
+  /** 1 : neutralisé dès le début du tournoi. */
   fromRound: number;
+  /** Dernière partie neutralisée ; `null` (ou absent) : jusqu'à la fin du tournoi. */
+  toRound?: number | null;
 }
 
 export interface Settings {
   roundCount: number;
-  /** Terrains disponibles, numérotés de 1 à n ; `null` (ou absent) : un terrain par rencontre. */
-  courtCount?: number | null;
-  /** Terrains neutralisés : ils ne sont plus donnés aux rencontres des parties `fromRound` et suivantes. */
+  /** Terrains disponibles, numérotés de 1 à n. */
+  courtCount: number;
+  /**
+   * Parties synchronisées : une partie ne démarre que lorsque la précédente est finie. Les
+   * terrains sont alors donnés dès le tirage, et ne sont partagés qu'entre les rencontres d'une
+   * même partie. Absent : les parties s'enchaînent, terrain par terrain.
+   */
+  syncRounds?: boolean;
+  /** Terrains neutralisés : ils ne sont pas donnés aux rencontres des parties `fromRound` à `toRound`. */
   closedCourts?: CourtClosure[];
   scoring: ScoringSettings;
   bye: ByeSettings;

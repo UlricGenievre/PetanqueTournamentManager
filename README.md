@@ -9,12 +9,15 @@ réparti selon l'écart de score.
   et si possible pas deux équipes du même secteur (champ facultatif, ex. un département voisin) ;
   une équipe exempte (score forfaitaire réglable) si le nombre d'équipes est impair.
   Les rencontres restent modifiables à la main, avec contrôle des contraintes.
-- **Terrains** : nombre de terrains réglable (numérotés de 1 à n), partagés entre les parties.
-  Les parties s'enchaînent sans attendre la fin de la précédente : une rencontre reçoit un
-  terrain libre dès que ses deux équipes ont fini leur partie précédente, et un terrain ne se
-  libère que lorsque le score de sa rencontre est saisi. Le terrain peut aussi être indiqué à
+- **Terrains** : nombre de terrains réglable (30 par défaut, numérotés de 1 à n). Par défaut,
+  les parties sont synchronisées : une partie démarre quand la précédente est finie, et chaque
+  rencontre reçoit son terrain dès le tirage (s'il manque des terrains, les rencontres restantes
+  attendent un terrain de leur partie). Sinon, les parties s'enchaînent sans attendre la fin de
+  la précédente : une rencontre reçoit un terrain libre dès que ses deux équipes ont fini leur
+  partie précédente. Dans les deux cas, un terrain ne se libère que lorsque le score de sa
+  rencontre est saisi. Le terrain peut aussi être indiqué à
   la main, quand on sait qu'il est libre avant d'avoir le score. Des terrains peuvent être
-  neutralisés pour tout le tournoi ou à partir d'une partie donnée ; les terrains sont
+  neutralisés pour tout le tournoi ou d'une partie à une autre ; les terrains sont
   redistribués à chaque modification (nombre, neutralisation, terrain indiqué à la main).
   L'onglet « Terrains » montre la rencontre en cours sur chaque terrain et signale les
   terrains neutralisés.

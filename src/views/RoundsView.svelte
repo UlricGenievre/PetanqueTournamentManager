@@ -1,11 +1,14 @@
 <script lang="ts">
   import { tick } from 'svelte';
+  import { SvelteSet } from 'svelte/reactivity';
   import { assignCourts, closedCourtsInUse, courtConflicts, displacedBy, freeCourts, isCourtOpen, isWaiting, setCourt, teamsReady } from '../lib/core/courts';
   import { newId } from '../lib/core/ids';
   import { drawRound, validateRound, type DrawLevel, type RoundIssue } from '../lib/core/pairing';
   import { effectiveScores, matchPoints } from '../lib/core/scoring';
   import type { Match, Round } from '../lib/core/types';
   import { app } from '../lib/store.svelte';
+  import Help from '../Help.svelte';
+  import RoundTabs, { playableCount, scoredCount } from './RoundTabs.svelte';
   import { printer } from '../print.svelte';
 
   const t = $derived(app.tournament);
@@ -30,10 +33,8 @@
   const closedInUse = $derived(round ? closedCourtsInUse(t, round) : []);
   const free = $derived(round ? freeCourts(t, round.number) : []);
   const waiting = $derived(round ? round.matches.filter(isWaiting) : []);
-  /** Rencontres en attente dont une équipe joue encore une partie précédente. */
-  const notReady = $derived(round ? new Set(waiting.filter((m) => !teamsReady(t, round, m))) : new Set<Match>());
-  const scoredCount = (r: Round) => r.matches.filter((m) => m.teamB !== null && m.scoreA !== null && m.scoreB !== null).length;
-  const playableCount = (r: Round) => r.matches.filter((m) => m.teamB !== null).length;
+  /** Rencontres en attente dont une équipe joue encore une partie précédente (sans objet si les parties sont synchronisées). */
+  const notReady = $derived(round && !t.settings.syncRounds ? new Set(waiting.filter((m) => !teamsReady(t, round, m))) : new Set<Match>());
   const hasScores = (r: Round) => r.matches.some((m) => m.scoreA !== null || m.scoreB !== null);
 
   const visibleMatches = $derived.by(() => {
@@ -47,6 +48,18 @@
       });
     });
   });
+
+  /** Rencontres dont on affiche la prochaine partie des deux équipes. */
+  const showNext = new SvelteSet<string>();
+  const nextRound = $derived(round ? t.rounds.find((r) => r.number === round.number + 1) : undefined);
+  const hasNextRound = $derived(!!round && round.number < t.settings.roundCount);
+
+  /** Rencontre de l'équipe dans la partie suivante, ou `undefined` si elle n'est pas tirée. */
+  function nextMatchOf(teamId: string): Match | undefined {
+    return nextRound?.matches.find((m) => m.teamA === teamId || m.teamB === teamId);
+  }
+
+  const teamName = (id: string | null) => (id ? (teamsById.get(id)?.name ?? '?') : '?');
 
   const teamLabel = (id: string | null) => {
     const team = id ? teamsById.get(id) : undefined;
@@ -93,7 +106,7 @@
     if (!round) return;
     const digits = input.value.replace(/\D/g, '');
     const court = digits === '' ? null : Number(digits);
-    const max = t.settings.courtCount ?? 99;
+    const max = t.settings.courtCount;
     const revert = () => (input.value = String(match.court ?? ''));
     if (court === match.court || (court === null && match.court == null)) return revert();
     if (court !== null && (court < 1 || court > max)) {
@@ -197,32 +210,36 @@
   };
 </script>
 
-<div class="round-tabs" role="tablist">
-  {#each Array.from({ length: t.settings.roundCount }, (_, i) => i + 1) as n (n)}
-    {@const r = t.rounds.find((x) => x.number === n)}
-    <button
-      role="tab"
-      aria-selected={selected === n}
-      class:active={selected === n}
-      class:done={r && scoredCount(r) === playableCount(r)}
-      disabled={!r && n !== t.rounds.length + 1}
-      onclick={() => {
-        selected = n;
-        editing = false;
-        filter = '';
-      }}
-    >
-      <span class="label">Partie {n}</span>
-      <span class="status">
-        {#if !r}à tirer{:else if scoredCount(r) === playableCount(r)}✓ terminée{:else}{scoredCount(r)}/{playableCount(r)} scores{/if}
-      </span>
-    </button>
-  {/each}
-</div>
+{#snippet nextOf(teamId: string)}
+  {@const next = nextMatchOf(teamId)}
+  {#if !nextRound}
+    <span class="muted">Partie {round!.number + 1} pas encore tirée</span>
+  {:else if !next}
+    <span class="muted">Pas de rencontre</span>
+  {:else if next.teamB === null}
+    <span class="name">{teamName(teamId)}</span> <em class="muted">exempte</em>
+  {:else}
+    <span class="next-match"><span class="name">{teamName(teamId)}</span> – <span class="name">{teamName(next.teamA === teamId ? next.teamB : next.teamA)}</span></span>
+    <span class="next-court">{next.court != null ? `Terrain ${next.court}` : 'En attente d’un terrain'}</span>
+  {/if}
+{/snippet}
+
+<RoundTabs
+  {selected}
+  selectable={(n) => t.rounds.some((r) => r.number === n) || n === t.rounds.length + 1}
+  onselect={(n) => {
+    selected = n;
+    editing = false;
+    filter = '';
+  }}
+/>
 
 {#if !round}
   <section class="card empty">
-    <h2>Partie {selected}</h2>
+    <h2>
+      Partie {selected}
+      <Help>Le tirage évite les rencontres entre équipes d'un même club ou d'un même secteur, et les rencontres déjà jouées.</Help>
+    </h2>
     {#if t.teams.length < 2}
       <p>Ajoutez d'abord les équipes (onglet « Équipes »).</p>
     {:else}
@@ -230,7 +247,6 @@
         {t.teams.length} équipes : {Math.floor(t.teams.length / 2)} rencontres{#if t.teams.length % 2}
           , et une équipe exempte (score forfaitaire {t.settings.bye.scoreFor}-{t.settings.bye.scoreAgainst}){/if}.
       </p>
-      <p class="muted">Le tirage évite les rencontres entre équipes d'un même club et les rencontres déjà jouées.</p>
       <button class="primary big" onclick={draw} disabled={!canDraw}>Tirer au sort la partie {selected}</button>
     {/if}
   </section>
@@ -265,110 +281,144 @@
       </p>
     {/if}
 
-    <table class="matches">
-      <thead>
-        <tr>
-          <th class="num">Terrain</th>
-          <th class="team-a">Équipe</th>
-          <th class="scores">Score</th>
-          <th>Équipe</th>
-          <th class="num">Points</th>
-          {#if editing}<th></th>{/if}
-        </tr>
-      </thead>
-      <tbody>
-        {#each visibleMatches as match (match.id)}
-          {@const scores = effectiveScores(match, t.settings)}
-          {@const points = scores ? matchPoints(scores[0], scores[1], t.settings.scoring) : null}
-          <tr class:complete={!!scores} class:bye={match.teamB === null} class:waiting={isWaiting(match)}>
-            <td class="num terrain">
-              {#if match.teamB === null}
-                —
-              {:else}
-                <input
-                  class="court"
-                  inputmode="numeric"
-                  maxlength="2"
-                  placeholder={notReady.has(match) ? 'en jeu' : 'attente'}
-                  title={notReady.has(match) ? 'Une équipe joue encore une partie précédente' : undefined}
-                  value={match.court ?? ''}
-                  onchange={(e) => changeCourt(match, e.currentTarget)}
-                  aria-label={`Terrain de ${teamLabel(match.teamA)} contre ${teamLabel(match.teamB)}`}
-                />
-              {/if}
-            </td>
-            <td class="team-a" class:winner={scores && scores[0] > scores[1]}>
-              {#if editing}
-                <select value={match.teamA} onchange={(e) => {
-                  assign(match, 'teamA', e.currentTarget.value);
-                  e.currentTarget.value = match.teamA; // si l'utilisateur a annulé
-                }}>
-                  {#each teamOptions as o (o.id)}<option value={o.id}>{o.number} · {o.name}</option>{/each}
-                </select>
-              {:else}
-                {teamLabel(match.teamA)}
-              {/if}
-            </td>
-            <td class="scores">
-              {#if match.teamB === null}
-                <span class="muted">{t.settings.bye.scoreFor} – {t.settings.bye.scoreAgainst}</span>
-              {:else}
-                <input
-                  class="score"
-                  inputmode="numeric"
-                  maxlength="2"
-                  value={match.scoreA ?? ''}
-                  oninput={(e) => (match.scoreA = parseScore(e.currentTarget.value))}
-                  onchange={scoreChanged}
-                  onkeydown={nextOnEnter}
-                  aria-label={`Score ${teamLabel(match.teamA)}`}
-                />
-                <span class="dash">–</span>
-                <input
-                  class="score"
-                  inputmode="numeric"
-                  maxlength="2"
-                  value={match.scoreB ?? ''}
-                  oninput={(e) => (match.scoreB = parseScore(e.currentTarget.value))}
-                  onchange={scoreChanged}
-                  onkeydown={nextOnEnter}
-                  aria-label={`Score ${teamLabel(match.teamB)}`}
-                />
-              {/if}
-            </td>
-            <td class:winner={scores && scores[1] > scores[0]}>
-              {#if editing}
-                <select value={match.teamB ?? ''} onchange={(e) => {
-                  assign(match, 'teamB', e.currentTarget.value || null);
-                  e.currentTarget.value = match.teamB ?? '';
-                }}>
-                  <option value="">— Exempte —</option>
-                  {#each teamOptions as o (o.id)}<option value={o.id}>{o.number} · {o.name}</option>{/each}
-                </select>
-              {:else if match.teamB === null}
-                <em class="muted">exempte</em>
-              {:else}
-                {teamLabel(match.teamB)}
-              {/if}
-            </td>
-            <td class="num points">
-              {#if points}{points[0]}{#if match.teamB !== null}&nbsp;–&nbsp;{points[1]}{/if}{/if}
-              {#if scores && Math.max(...scores) > 13}<span class="warn-text" title="Score supérieur à 13">⚠</span>{/if}
-            </td>
-            {#if editing}
-              <td><button class="link" onclick={() => removeMatch(match)}>Retirer</button></td>
-            {/if}
+    <div class="table-scroll">
+      <table class="matches">
+        <!-- Largeurs fixes : elles ne changent ni d'une partie à l'autre, ni en ouvrant la partie suivante. -->
+        <colgroup>
+          <col class="col-court" />
+          <col />
+          <col class="col-scores" />
+          <col />
+          <col class="col-points" />
+          {#if hasNextRound}<col class="col-toggle" />{/if}
+          {#if editing}<col class="col-edit" />{/if}
+        </colgroup>
+        <thead>
+          <tr>
+            <th class="num">Terrain</th>
+            <th class="team-a">Équipe</th>
+            <th class="scores">Score</th>
+            <th>Équipe</th>
+            <th class="num">Points</th>
+            {#if hasNextRound}<th></th>{/if}
+            {#if editing}<th></th>{/if}
           </tr>
-        {:else}
-          <tr><td colspan="6" class="muted">Aucune rencontre ne correspond à « {filter} ».</td></tr>
-        {/each}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {#each visibleMatches as match (match.id)}
+            {@const scores = effectiveScores(match, t.settings)}
+            {@const points = scores ? matchPoints(scores[0], scores[1], t.settings.scoring) : null}
+            <tr class:complete={!!scores} class:bye={match.teamB === null} class:waiting={isWaiting(match)} class:expanded={hasNextRound && showNext.has(match.id)}>
+              <td class="num terrain">
+                {#if match.teamB === null}
+                  —
+                {:else}
+                  <input
+                    class="court"
+                    inputmode="numeric"
+                    maxlength="2"
+                    placeholder={notReady.has(match) ? 'en jeu' : 'attente'}
+                    title={notReady.has(match) ? 'Une équipe joue encore une partie précédente' : undefined}
+                    value={match.court ?? ''}
+                    onchange={(e) => changeCourt(match, e.currentTarget)}
+                    aria-label={`Terrain de ${teamLabel(match.teamA)} contre ${teamLabel(match.teamB)}`}
+                  />
+                {/if}
+              </td>
+              <td class="team-a" class:winner={scores && scores[0] > scores[1]}>
+                {#if editing}
+                  <select value={match.teamA} onchange={(e) => {
+                    assign(match, 'teamA', e.currentTarget.value);
+                    e.currentTarget.value = match.teamA; // si l'utilisateur a annulé
+                  }}>
+                    {#each teamOptions as o (o.id)}<option value={o.id}>{o.number} · {o.name}</option>{/each}
+                  </select>
+                {:else}
+                  <span class="name">{teamLabel(match.teamA)}</span>
+                {/if}
+              </td>
+              <td class="scores">
+                {#if match.teamB === null}
+                  <span class="muted">{t.settings.bye.scoreFor} – {t.settings.bye.scoreAgainst}</span>
+                {:else}
+                  <input
+                    class="score"
+                    inputmode="numeric"
+                    maxlength="2"
+                    value={match.scoreA ?? ''}
+                    oninput={(e) => (match.scoreA = parseScore(e.currentTarget.value))}
+                    onchange={scoreChanged}
+                    onkeydown={nextOnEnter}
+                    aria-label={`Score ${teamLabel(match.teamA)}`}
+                  />
+                  <span class="dash">–</span>
+                  <input
+                    class="score"
+                    inputmode="numeric"
+                    maxlength="2"
+                    value={match.scoreB ?? ''}
+                    oninput={(e) => (match.scoreB = parseScore(e.currentTarget.value))}
+                    onchange={scoreChanged}
+                    onkeydown={nextOnEnter}
+                    aria-label={`Score ${teamLabel(match.teamB)}`}
+                  />
+                {/if}
+              </td>
+              <td class:winner={scores && scores[1] > scores[0]}>
+                {#if editing}
+                  <select value={match.teamB ?? ''} onchange={(e) => {
+                    assign(match, 'teamB', e.currentTarget.value || null);
+                    e.currentTarget.value = match.teamB ?? '';
+                  }}>
+                    <option value="">— Exempte —</option>
+                    {#each teamOptions as o (o.id)}<option value={o.id}>{o.number} · {o.name}</option>{/each}
+                  </select>
+                {:else if match.teamB === null}
+                  <em class="muted">exempte</em>
+                {:else}
+                  <span class="name">{teamLabel(match.teamB)}</span>
+                {/if}
+              </td>
+              <td class="num points">
+                {#if points}{points[0]}{#if match.teamB !== null}&nbsp;–&nbsp;{points[1]}{/if}{/if}
+                {#if scores && Math.max(...scores) > 13}<span class="warn-text" title="Score supérieur à 13">⚠</span>{/if}
+              </td>
+              {#if hasNextRound}
+                <td class="next-toggle">
+                  <button
+                    class="toggle"
+                    class:open={showNext.has(match.id)}
+                    aria-expanded={showNext.has(match.id)}
+                    title={`Partie ${round.number + 1} de ces équipes`}
+                    aria-label={`Partie ${round.number + 1} de ${teamLabel(match.teamA)}${match.teamB ? ` et de ${teamLabel(match.teamB)}` : ''}`}
+                    onclick={() => (showNext.has(match.id) ? showNext.delete(match.id) : showNext.add(match.id))}
+                  >{showNext.has(match.id) ? '−' : '+'}</button>
+                </td>
+              {/if}
+              {#if editing}
+                <td><button class="link" onclick={() => removeMatch(match)}>Retirer</button></td>
+              {/if}
+            </tr>
+            {#if hasNextRound && showNext.has(match.id)}
+              <tr class="next-row" class:complete={!!scores} class:bye={match.teamB === null}>
+                <td class="num muted next-label">Partie {round.number + 1}</td>
+                <td class="team-a">{@render nextOf(match.teamA)}</td>
+                <td></td>
+                <td>{#if match.teamB}{@render nextOf(match.teamB)}{/if}</td>
+                <td colspan={editing ? 3 : 2}></td>
+              </tr>
+            {/if}
+          {:else}
+            <tr><td colspan="7" class="muted">Aucune rencontre ne correspond à « {filter} ».</td></tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
 
     {#if editing}
       <div class="actions edit-actions">
         <button onclick={addMatch} disabled={missingTeams.length === 0}>Ajouter une rencontre avec les équipes sans adversaire</button>
-        <span class="muted small">Choisir une équipe déjà placée l'échange avec celle qu'elle remplace.</span>
+        <span><Help>Choisir une équipe déjà placée l'échange avec celle qu'elle remplace.</Help></span>
       </div>
     {/if}
 
@@ -387,39 +437,6 @@
 {/if}
 
 <style>
-  .round-tabs {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .round-tabs button {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0;
-    padding: 0.5em 0.8em;
-  }
-
-  .round-tabs .label {
-    font-weight: 600;
-  }
-
-  .round-tabs .status {
-    font-size: 0.8rem;
-    color: var(--muted);
-  }
-
-  .round-tabs button.done .status {
-    color: var(--ok);
-  }
-
-  .round-tabs button.active {
-    border-color: var(--accent);
-    box-shadow: inset 0 0 0 1px var(--accent);
-    background: var(--accent-soft);
-  }
-
   .empty {
     text-align: center;
     padding: 2.5rem 1rem;
@@ -452,6 +469,36 @@
     padding-left: 1.2rem;
   }
 
+  /* Sur un écran étroit, le tableau défile plutôt que d'écraser les noms d'équipe. */
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  .matches {
+    table-layout: fixed;
+    min-width: 46rem;
+  }
+
+  .col-court {
+    width: 5.5rem;
+  }
+
+  .col-scores {
+    width: 9rem;
+  }
+
+  .col-points {
+    width: 5.5rem;
+  }
+
+  .col-toggle {
+    width: 2.8rem;
+  }
+
+  .col-edit {
+    width: 6rem;
+  }
+
   .matches td {
     padding-top: 0.3em;
     padding-bottom: 0.3em;
@@ -464,7 +511,6 @@
   .matches .scores {
     text-align: center;
     white-space: nowrap;
-    width: 9rem;
   }
 
   .matches tr.complete {
@@ -477,7 +523,6 @@
 
   .terrain {
     font-weight: 600;
-    width: 4.5rem;
   }
 
   input.court {
@@ -518,10 +563,51 @@
     color: var(--muted);
   }
 
+  .toggle {
+    width: 1.6rem;
+    height: 1.6rem;
+    padding: 0;
+    justify-content: center;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .toggle.open {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+
+  /* La ligne de la partie suivante prolonge celle de la rencontre, sans trait entre les deux. */
+  .matches tr.expanded td {
+    border-bottom: none;
+  }
+
+  .matches tr.next-row td {
+    padding-top: 0;
+    font-size: 0.82rem;
+  }
+
+  .next-label {
+    white-space: nowrap;
+  }
+
+  /* Un nom d'équipe ne se coupe jamais : le numéro (« VALCOMBE 2 ») resterait seul sur sa ligne. */
+  .name {
+    white-space: nowrap;
+  }
+
+  .next-match,
+  .next-court {
+    display: block;
+  }
+
+  .next-court {
+    font-weight: 600;
+  }
+
   .points {
     color: var(--muted);
     white-space: nowrap;
-    width: 5.5rem;
   }
 
   .warn-text {
@@ -540,9 +626,5 @@
 
   .footer {
     justify-content: flex-end;
-  }
-
-  .small {
-    font-size: 0.85rem;
   }
 </style>

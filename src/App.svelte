@@ -5,12 +5,13 @@
   import PrintArea from './print/PrintArea.svelte';
   import CourtsView from './views/CourtsView.svelte';
   import RoundsView from './views/RoundsView.svelte';
-  import SettingsView from './views/SettingsView.svelte';
+  import RulesView from './views/RulesView.svelte';
   import StandingsView from './views/StandingsView.svelte';
   import TeamsView from './views/TeamsView.svelte';
+  import TournamentView from './views/TournamentView.svelte';
 
-  type Tab = 'settings' | 'teams' | 'rounds' | 'courts' | 'standings';
-  let tab = $state<Tab>(app.tournament.teams.length ? 'rounds' : 'teams');
+  type Tab = 'tournament' | 'teams' | 'rounds' | 'courts' | 'standings' | 'rules';
+  let tab = $state<Tab>(app.tournament.teams.length ? 'rounds' : 'tournament');
 
   onMount(() => void app.init());
 
@@ -21,11 +22,12 @@
   });
 
   const tabs: { id: Tab; label: () => string }[] = [
+    { id: 'tournament', label: () => 'Tournoi' },
     { id: 'teams', label: () => `Équipes (${app.tournament.teams.length})` },
     { id: 'rounds', label: () => 'Parties & scores' },
     { id: 'courts', label: () => 'Terrains' },
     { id: 'standings', label: () => 'Classement' },
-    { id: 'settings', label: () => 'Tournoi & fichier' },
+    { id: 'rules', label: () => 'Règles & fichier' },
   ];
 
   const formattedDate = $derived(
@@ -88,7 +90,9 @@
       </div>
     {/if}
 
-    {#if tab === 'teams'}
+    {#if tab === 'tournament'}
+      <TournamentView />
+    {:else if tab === 'teams'}
       <TeamsView />
     {:else if tab === 'rounds'}
       <RoundsView />
@@ -97,7 +101,7 @@
     {:else if tab === 'standings'}
       <StandingsView />
     {:else}
-      <SettingsView />
+      <RulesView />
     {/if}
   </main>
 </div>

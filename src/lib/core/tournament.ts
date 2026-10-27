@@ -1,7 +1,9 @@
 import { migrateCourts } from './courts';
 import { newId } from './ids';
 import { DEFAULT_SCORING } from './scoring';
-import { SCHEMA_VERSION, type Team, type Tournament } from './types';
+import { SCHEMA_VERSION, type Round, type Team, type Tournament } from './types';
+
+export const DEFAULT_COURT_COUNT = 30;
 
 export function createTournament(name = '12 Heures de Pétanque de Montesquieu', date = today()): Tournament {
   return {
@@ -11,7 +13,8 @@ export function createTournament(name = '12 Heures de Pétanque de Montesquieu',
     date,
     settings: {
       roundCount: 8,
-      courtCount: null,
+      courtCount: DEFAULT_COURT_COUNT,
+      syncRounds: true,
       scoring: { total: DEFAULT_SCORING.total, table: [...DEFAULT_SCORING.table] },
       bye: { scoreFor: 13, scoreAgainst: 7 },
     },
@@ -50,5 +53,10 @@ export function parseTournament(json: string): Tournament {
     throw new Error("Ce fichier n'est pas une sauvegarde de tournoi valide.");
   }
   migrateCourts(data.rounds);
+  // Sauvegardes où le nombre de terrains était facultatif : assez de terrains pour ceux déjà donnés.
+  if (data.settings.courtCount == null) {
+    const used = data.rounds.flatMap((r: Round) => r.matches.map((m) => m.court ?? 0));
+    data.settings.courtCount = Math.max(DEFAULT_COURT_COUNT, ...used);
+  }
   return data as Tournament;
 }

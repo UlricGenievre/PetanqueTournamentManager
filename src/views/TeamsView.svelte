@@ -3,6 +3,7 @@
   import { clubFromTeamName, nextTeamNumber, parseTeamLines } from '../lib/core/tournament';
   import type { Team } from '../lib/core/types';
   import { app } from '../lib/store.svelte';
+  import Help from '../Help.svelte';
 
   let pasted = $state('');
   let newName = $state('');
@@ -131,8 +132,7 @@
     </section>
 
     <section class="card">
-      <h3>Coller une liste</h3>
-      <p class="muted small">Une équipe par ligne. Le club est déduit du nom : « VALCOMBE 2 » → club « VALCOMBE ».</p>
+      <h3>Coller une liste <Help>Une équipe par ligne. Le club est déduit du nom : « VALCOMBE 2 » → club « VALCOMBE ».</Help></h3>
       <textarea rows="8" bind:value={pasted} placeholder={'VALCOMBE 1\nVALCOMBE 2\nMIRANDOL 1\nSERVIAC'}></textarea>
       <button class="primary" onclick={addPasted} disabled={pastedCount === 0}>
         Ajouter {pastedCount || ''} équipe{pastedCount > 1 ? 's' : ''}
@@ -141,8 +141,7 @@
 
     {#if clubs.length}
       <section class="card">
-        <h3>Clubs ({clubs.length})</h3>
-        <p class="muted small">Deux équipes d'un même club ne se rencontrent pas au tirage.</p>
+        <h3>Clubs ({clubs.length}) <Help>Deux équipes d'un même club ne se rencontrent pas au tirage.</Help></h3>
         <ul class="clubs">
           {#each clubs as club (club.label)}
             <li><span>{club.label}</span><span class="muted">{club.count}</span></li>
@@ -152,11 +151,13 @@
     {/if}
 
     <section class="card">
-      <h3>Secteurs{sectors.length ? ` (${sectors.length})` : ''}</h3>
-      <p class="muted small">
-        Facultatif. Deux équipes d'un même secteur (ex. venues du même département) évitent de se rencontrer ;
-        cette règle est relâchée en premier si le tirage est impossible.
-      </p>
+      <h3>
+        Secteurs{sectors.length ? ` (${sectors.length})` : ''}
+        <Help>
+          Facultatif. Deux équipes d'un même secteur (ex. venues du même département) évitent de se rencontrer ;
+          cette règle est relâchée en premier si le tirage est impossible.
+        </Help>
+      </h3>
       {#if sectors.length}
         <ul class="clubs">
           {#each sectors as sector (sector.label)}

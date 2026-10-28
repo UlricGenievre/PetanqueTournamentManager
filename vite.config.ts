@@ -35,6 +35,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{html,png,webmanifest}'],
+        // La vidéo de prise en main est publiée à côté : l'ouvrir ne doit pas afficher l'appli.
+        navigateFallbackDenylist: [/\.webm$/],
         // Avec le fichier unique, certains fichiers sont listés deux fois, dont une sans révision :
         // Workbox refuse alors d'installer le cache, et index.html ne serait jamais mis à jour.
         // On dédoublonne et on calcule une empreinte pour les fichiers qui n'en ont pas.

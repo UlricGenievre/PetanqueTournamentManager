@@ -27,6 +27,8 @@ jobs:
       - run: npm run check
       - run: npm test
       - run: npm run build
+      # Publiée à côté de l'appli pour s'ouvrir dans le navigateur (GitHub force son téléchargement).
+      - run: cp docs/demo.webm dist/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

@@ -4,7 +4,7 @@ Application de gestion des tournois de pétanque du club, pensée d'abord pour l
 **12 Heures de Pétanque de Montesquieu** : 8 parties chronométrées, barème de 10 points
 réparti selon l'écart de score.
 
-▶ **[Vidéo de prise en main](docs/demo.webm)** (2 min) : réglage du tournoi et des terrains,
+▶ **[Vidéo de prise en main](https://ulricgenievre.github.io/PetanqueTournamentManager/demo.webm)** (2 min) : réglage du tournoi et des terrains,
 équipes, tirage, saisie des scores, terrains et classement.
 
 - **Équipes** : saisie ou liste collée ; le club est déduit du nom (« VALCOMBE 2 » → VALCOMBE).

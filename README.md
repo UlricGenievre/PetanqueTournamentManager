@@ -56,7 +56,12 @@ npm test         # tests unitaires
 npm run check    # vérification des types
 npm run build    # dist/index.html (+ manifest, service worker, icônes pour la PWA)
 npm run icons    # régénère les icônes PNG
+npm run demo     # régénère docs/demo.webm (avec npm run dev lancé à côté)
 ```
+
+La vidéo est filmée avec Playwright : il faut d'abord installer son navigateur et son
+ffmpeg (`npx playwright-core install chromium-headless-shell ffmpeg`, et sous Linux
+`npx playwright-core install-deps chromium-headless-shell`).
 
 Chaque push sur `main` déploie `dist/` sur GitHub Pages
 (Settings → Pages → Source : « GitHub Actions »).

@@ -1,5 +1,6 @@
 import { newId } from './ids';
-import type { Match, Round, Team, Tournament } from './types';
+import { computeStandings } from './standings';
+import type { Match, PairingMode, Round, Team, Tournament } from './types';
 
 /** Normalise un libellé saisi à la main : ignore la casse, les accents et la ponctuation. */
 function normalizeLabel(label: string): string {
@@ -95,6 +96,47 @@ function pairUp(ids: string[], allowed: (a: string, b: string) => boolean, rng: 
   return solve(ids);
 }
 
+/**
+ * Apparie les équipes de `order` (classées de la première à la dernière) en respectant `allowed` :
+ * la première affronte la mieux classée des équipes possibles, et ainsi de suite (1er contre 2e,
+ * ou 3e, 4e… si les contraintes l'imposent). Un adversaire n'est choisi que si les équipes
+ * restantes peuvent encore toutes être appariées : la première équipe prend l'adversaire le mieux
+ * classé possible, puis la suivante, etc.
+ */
+function pairByRank(order: string[], isAllowed: (a: string, b: string) => boolean, budget: { left: number }) {
+  const ok = new Set<string>();
+  for (const a of order) for (const b of order) if (a < b && isAllowed(a, b)) ok.add(pairKey(a, b));
+  const allowed = (a: string, b: string) => ok.has(pairKey(a, b));
+  const solve = (remaining: string[]): [string, string][] | null => {
+    if (remaining.length === 0) return [];
+    if (--budget.left < 0) return null;
+    // Élagage : une équipe sans adversaire possible rend la branche sans issue.
+    for (const id of remaining) if (!remaining.some((o) => o !== id && allowed(id, o))) return null;
+
+    const [first, ...others] = remaining;
+    for (const partner of others) {
+      if (!allowed(first, partner)) continue;
+      const sub = solve(others.filter((id) => id !== partner));
+      if (sub) return [[first, partner], ...sub];
+      if (budget.left < 0) return null;
+    }
+    return null;
+  };
+  return solve(order);
+}
+
+/**
+ * Équipes de la mieux classée à la moins bien classée d'après les parties précédant `roundNumber`
+ * (scores saisis au moment du tirage). Les équipes à égalité parfaite sont mélangées au hasard :
+ * avant la première partie, l'ordre est donc entièrement tiré au sort.
+ */
+export function rankingOrder(tournament: Tournament, roundNumber: number, rng: Rng = Math.random): string[] {
+  const rows = computeStandings(tournament, roundNumber - 1);
+  const groups = new Map<number, string[]>();
+  for (const row of rows) groups.set(row.rank, [...(groups.get(row.rank) ?? []), row.team.id]);
+  return [...groups.keys()].sort((a, b) => a - b).flatMap((rank) => shuffle(groups.get(rank)!, rng));
+}
+
 /** Niveau de contraintes finalement respecté par un tirage. */
 export type DrawLevel =
   | 'strict'
@@ -110,22 +152,26 @@ export interface DrawResult {
 }
 
 /**
- * Tire au sort les rencontres de la partie `roundNumber`.
+ * Établit les rencontres de la partie `roundNumber`.
+ * `mode` : `'random'` tire les rencontres au sort ; `'ranking'` les établit selon le classement au
+ * moment du tirage (1er contre 2e, 3e contre 4e… en sautant les adversaires interdits).
  * Contraintes : pas deux équipes du même club, pas de rencontre déjà jouée, pas deux équipes du même secteur.
- * Si le nombre d'équipes est impair, une équipe (parmi les moins souvent exemptées) est exempte.
+ * Si le nombre d'équipes est impair, une équipe (parmi les moins souvent exemptées) est exempte :
+ * au hasard, ou la moins bien classée selon le classement.
  * Si aucun tirage strict n'existe, les contraintes sont relâchées progressivement (`level` l'indique) :
  * le secteur d'abord, puis les revanches, puis le club (le secteur n'est plus vérifié une fois le club relâché).
  */
-export function drawRound(tournament: Tournament, roundNumber: number, rng: Rng = Math.random): DrawResult {
+export function drawRound(tournament: Tournament, roundNumber: number, rng: Rng = Math.random, mode: PairingMode = 'random'): DrawResult {
   const teams = new Map(tournament.teams.map((t) => [t.id, t]));
   const met = meetings(tournament, roundNumber);
-  const ids = tournament.teams.map((t) => t.id);
+  const ids = mode === 'ranking' ? rankingOrder(tournament, roundNumber, rng) : tournament.teams.map((t) => t.id);
 
   let byeCandidates: (string | null)[] = [null];
   if (ids.length % 2 === 1) {
     const counts = byeCounts(tournament, roundNumber);
     const min = Math.min(...ids.map((id) => counts.get(id) ?? 0));
-    byeCandidates = shuffle(ids.filter((id) => (counts.get(id) ?? 0) === min), rng);
+    const eligible = ids.filter((id) => (counts.get(id) ?? 0) === min);
+    byeCandidates = mode === 'ranking' ? eligible.reverse() : shuffle(eligible, rng);
   }
 
   const rematch = (a: string, b: string) => met.has(pairKey(a, b));
@@ -143,7 +189,7 @@ export function drawRound(tournament: Tournament, roundNumber: number, rng: Rng 
   for (const [level, allowed] of levels) {
     for (const bye of byeCandidates) {
       const pool = ids.filter((id) => id !== bye);
-      const pairs = pairUp(pool, allowed, rng, { left: 20000 });
+      const pairs = mode === 'ranking' ? pairByRank(pool, allowed, { left: 20000 }) : pairUp(pool, allowed, rng, { left: 20000 });
       if (!pairs) continue;
       const matches: Match[] = pairs.map(([a, b]) => ({ id: newId(), teamA: a, teamB: b, scoreA: null, scoreB: null, court: null }));
       if (bye !== null) matches.push({ id: newId(), teamA: bye, teamB: null, scoreA: null, scoreB: null, court: null });

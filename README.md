@@ -11,6 +11,8 @@ réparti selon l'écart de score.
 - **Tirage** de chaque partie : pas deux équipes du même club, pas de rencontre déjà jouée,
   et si possible pas deux équipes du même secteur (champ facultatif, ex. un département voisin) ;
   une équipe exempte (score forfaitaire réglable) si le nombre d'équipes est impair.
+  À partir de la partie 2, les rencontres peuvent aussi suivre le classement du moment
+  (1er contre 2e, 3e contre 4e… ; un adversaire interdit est sauté au profit du suivant au classement).
   Les rencontres restent modifiables à la main, avec contrôle des contraintes.
 - **Terrains** : nombre de terrains réglable (30 par défaut, numérotés de 1 à n). Par défaut,
   les parties sont synchronisées : une partie démarre quand la précédente est finie, et chaque

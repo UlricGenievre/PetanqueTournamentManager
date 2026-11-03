@@ -27,9 +27,14 @@ export interface Match {
   courtFreed?: boolean;
 }
 
+/** `random` : rencontres tirées au sort ; `ranking` : selon le classement au moment du tirage. */
+export type PairingMode = 'random' | 'ranking';
+
 export interface Round {
   number: number;
   matches: Match[];
+  /** Façon dont les rencontres ont été établies (absent : tirage au sort). */
+  pairing?: PairingMode;
 }
 
 export interface ScoringSettings {

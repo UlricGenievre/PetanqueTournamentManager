@@ -5,7 +5,7 @@
   import { newId } from '../lib/core/ids';
   import { drawRound, validateRound, type DrawLevel, type RoundIssue } from '../lib/core/pairing';
   import { effectiveScores, matchPoints } from '../lib/core/scoring';
-  import type { Match, Round } from '../lib/core/types';
+  import type { Match, PairingMode, Round } from '../lib/core/types';
   import { app } from '../lib/store.svelte';
   import Help from '../Help.svelte';
   import RoundTabs, { playableCount, scoredCount } from './RoundTabs.svelte';
@@ -36,6 +36,10 @@
   /** Rencontres en attente dont une équipe joue encore une partie précédente (sans objet si les parties sont synchronisées). */
   const notReady = $derived(round && !t.settings.syncRounds ? new Set(waiting.filter((m) => !teamsReady(t, round, m))) : new Set<Match>());
   const hasScores = (r: Round) => r.matches.some((m) => m.scoreA !== null || m.scoreB !== null);
+  /** Rencontres des parties précédentes dont le score manque : le classement n'est alors que provisoire. */
+  const missingBefore = $derived(
+    t.rounds.filter((r) => r.number < selected).reduce((n, r) => n + r.matches.filter((m) => !effectiveScores(m, t.settings)).length, 0),
+  );
 
   const visibleMatches = $derived.by(() => {
     if (!round) return [];
@@ -66,18 +70,21 @@
     return team ? `${team.number} · ${team.name}` : '?';
   };
 
-  function draw() {
-    const result = drawRound(t, selected);
+  function draw(mode: PairingMode) {
+    const result = drawRound(t, selected, Math.random, mode);
+    const pairing = mode === 'ranking' ? mode : undefined;
     const existing = t.rounds.find((r) => r.number === selected);
-    if (existing) existing.matches = result.matches;
-    else t.rounds.push({ number: selected, matches: result.matches });
+    if (existing) {
+      existing.matches = result.matches;
+      existing.pairing = pairing;
+    } else t.rounds.push({ number: selected, matches: result.matches, pairing });
     assignCourts(t);
     drawMessage = result.level === 'strict' ? null : { round: selected, level: result.level };
     editing = false;
   }
 
   function redraw() {
-    if (round && confirm(`Refaire le tirage de la partie ${round.number} ?`)) draw();
+    if (round && confirm(`Refaire le tirage de la partie ${round.number} ?`)) draw(round.pairing ?? 'random');
   }
 
   function deleteRound() {
@@ -238,7 +245,11 @@
   <section class="card empty">
     <h2>
       Partie {selected}
-      <Help>Le tirage évite les rencontres entre équipes d'un même club ou d'un même secteur, et les rencontres déjà jouées.</Help>
+      <Help>
+        Le tirage évite les rencontres entre équipes d'un même club ou d'un même secteur, et les rencontres déjà jouées.
+        « Selon le classement » : le 1er rencontre le 2e, le 3e le 4e, etc. ; un adversaire interdit est sauté au profit du suivant
+        au classement (1er contre 3e, 4e…). L'équipe exempte est alors la dernière du classement parmi celles qui ne l'ont pas encore été.
+      </Help>
     </h2>
     {#if t.teams.length < 2}
       <p>Ajoutez d'abord les équipes (onglet « Équipes »).</p>
@@ -247,7 +258,18 @@
         {t.teams.length} équipes : {Math.floor(t.teams.length / 2)} rencontres{#if t.teams.length % 2}
           , et une équipe exempte (score forfaitaire {t.settings.bye.scoreFor}-{t.settings.bye.scoreAgainst}){/if}.
       </p>
-      <button class="primary big" onclick={draw} disabled={!canDraw}>Tirer au sort la partie {selected}</button>
+      <div class="draw-buttons">
+        <button class="primary big" onclick={() => draw('random')} disabled={!canDraw}>Tirer au sort la partie {selected}</button>
+        {#if selected > 1}
+          <button class="big" onclick={() => draw('ranking')} disabled={!canDraw}>Rencontres selon le classement</button>
+        {/if}
+      </div>
+      {#if selected > 1 && canDraw && missingBefore}
+        <p class="muted">
+          {missingBefore} score{missingBefore > 1 ? 's' : ''} manque{missingBefore > 1 ? 'nt' : ''} dans les parties précédentes : le classement
+          utilisé pour les rencontres ne tiendrait compte que des scores déjà saisis.
+        </p>
+      {/if}
     {/if}
   </section>
 {:else}
@@ -262,6 +284,9 @@
       </div>
     </div>
 
+    {#if round.pairing === 'ranking'}
+      <p class="muted pairing">Rencontres établies selon le classement après la partie {round.number - 1} (au moment du tirage).</p>
+    {/if}
     {#if drawMessage && drawMessage.round === round.number}
       <div class="notice warn">{levelText[drawMessage.level]}</div>
     {/if}
@@ -437,6 +462,17 @@
 {/if}
 
 <style>
+  .draw-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .pairing {
+    margin: 0.25rem 0 0.5rem;
+  }
+
   .empty {
     text-align: center;
     padding: 2.5rem 1rem;

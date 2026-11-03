@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fixture from './__fixtures__/montesquieu-2025.json';
 import { assignCourts, closedCourtsInUse, courtBoard, courtConflicts, displacedBy, formatCourtList, freeCourts, isCourtOpen, migrateCourts, parseCourtList, setCourt, setSyncRounds, teamsReady } from './courts';
-import { drawRound, meetings, sameClub, sameSector, validateRound } from './pairing';
+import { drawRound, meetings, rankingOrder, sameClub, sameSector, validateRound } from './pairing';
 import { DEFAULT_SCORING, matchPoints } from './scoring';
 import { computeStandings } from './standings';
 import { clubFromTeamName, createTournament, parseTeamLines, parseTournament } from './tournament';
@@ -193,6 +193,80 @@ describe('tirage', () => {
     round.matches = [{ ...round.matches[0], teamA: first.teamA, teamB: first.teamB }];
     expect(validateRound(t, round).map((i) => i.kind)).toContain('rematch');
     expect(meetings(t).size).toBe(160);
+  });
+});
+
+describe('rencontres selon le classement', () => {
+  /** 4 équipes classées A, B, C, D après une première partie A–D 13-0 et B–C 13-5. */
+  function fourTeams(names = 'ALPHA\nBRAVO\nCHARLIE\nDELTA'): Tournament {
+    const t = createTournament();
+    t.teams = parseTeamLines(names);
+    const [a, b, c, d] = t.teams.map((x) => x.id);
+    t.rounds = [{ number: 1, matches: [{ id: 'm1', teamA: a, teamB: d, scoreA: 13, scoreB: 0 }, { id: 'm2', teamA: b, teamB: c, scoreA: 13, scoreB: 5 }] }];
+    return t;
+  }
+  const names = (t: Tournament, matches: { teamA: string; teamB: string | null }[]) =>
+    matches.map((m) => [m.teamA, m.teamB].map((id) => t.teams.find((x) => x.id === id)?.name ?? '-').join('–'));
+
+  it('1er contre 2e, 3e contre 4e', () => {
+    const t = fourTeams();
+    const { matches, level } = drawRound(t, 2, seeded(1), 'ranking');
+    expect(level).toBe('strict');
+    expect(names(t, matches)).toEqual(['ALPHA–BRAVO', 'CHARLIE–DELTA']);
+  });
+
+  it('saute un adversaire du même club', () => {
+    const t = fourTeams('VALCOMBE 1\nVALCOMBE 2\nCHARLIE\nDELTA');
+    expect(names(t, drawRound(t, 2, seeded(1), 'ranking').matches)).toEqual(['VALCOMBE 1–CHARLIE', 'VALCOMBE 2–DELTA']);
+  });
+
+  it('saute un adversaire si les équipes restantes ne peuvent plus être appariées', () => {
+    // 1er contre 2e laisserait CHARLIE 1 contre CHARLIE 2, du même club.
+    const t = fourTeams('ALPHA\nBRAVO\nCHARLIE 1\nCHARLIE 2');
+    const { matches, level } = drawRound(t, 2, seeded(1), 'ranking');
+    expect(level).toBe('strict');
+    expect(names(t, matches)).toEqual(['ALPHA–CHARLIE 1', 'BRAVO–CHARLIE 2']);
+  });
+
+  it('exempte la moins bien classée des équipes jamais exemptées', () => {
+    const t = fourTeams('ALPHA\nBRAVO\nCHARLIE\nDELTA\nECHO');
+    const [a, , , , e] = t.teams.map((x) => x.id);
+    t.rounds[0].matches.push({ id: 'm3', teamA: e, teamB: null, scoreA: null, scoreB: null });
+    // ECHO, exempte en partie 1 (13-7), est 3e ; DELTA est dernière.
+    const { matches } = drawRound(t, 2, seeded(1), 'ranking');
+    expect(names(t, matches)).toEqual(['ALPHA–BRAVO', 'ECHO–CHARLIE', 'DELTA–-']);
+    expect(matches[0].teamA).toBe(a);
+  });
+
+  it('avant la première partie, l’ordre est tiré au sort', () => {
+    const t = createTournament();
+    t.teams = parseTeamLines(Array.from({ length: 20 }, (_, i) => `CLUB${i}`).join('\n'));
+    const orders = [1, 2, 3].map((seed) => rankingOrder(t, 1, seeded(seed)).join());
+    expect(new Set(orders).size).toBe(3);
+  });
+
+  it.each([1, 2, 3])('8 parties à 40 équipes sans même club ni revanche (graine %i)', (seed) => {
+    const t = tournament2025();
+    t.rounds = [];
+    const rng = seeded(seed);
+    for (let n = 1; n <= t.settings.roundCount; n++) {
+      const { matches, level } = drawRound(t, n, rng, 'ranking');
+      expect(level).toBe('strict');
+      for (const m of matches) [m.scoreA, m.scoreB] = rng() < 0.5 ? [13, Math.floor(rng() * 13)] : [Math.floor(rng() * 13), 13];
+      t.rounds.push({ number: n, matches });
+      expect(validateRound(t, t.rounds[n - 1])).toEqual([]);
+    }
+  });
+
+  it('la première rencontre oppose le 1er au mieux classé de ses adversaires possibles', () => {
+    const t = tournament2025();
+    t.rounds = t.rounds.slice(0, 4);
+    const order = rankingOrder(t, 5, seeded(1));
+    const { matches } = drawRound(t, 5, seeded(1), 'ranking');
+    const met = meetings(t, 5);
+    const teams = new Map(t.teams.map((x) => [x.id, x]));
+    const first = order.find((id) => id !== order[0] && !sameClub(teams.get(order[0])!, teams.get(id)!) && !met.has([order[0], id].sort().join('|')));
+    expect([matches[0].teamA, matches[0].teamB]).toEqual([order[0], first]);
   });
 });
 
